@@ -216,8 +216,10 @@ export function EditFileClient({
         const testData = formData.data as TestData;
         if (!testData.course?.name?.trim())
           highlightIds.push("test-course-name");
-        if (!testData.time?.start || !testData.time?.end)
+        const yearValidation = validateYearRange(testData.time.start, testData.time.end);
+        if (!yearValidation.isValid) {
           highlightIds.push("test-time-range");
+        }
         if (!testData.content?.length) highlightIds.push("test-content");
         break;
       case "doc":
