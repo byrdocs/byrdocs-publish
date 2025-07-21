@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { Input } from "@/components/ui/input";
+import { Label, LabelKbd } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button, ButtonKbd, ShortcutProvider } from "@/components/ui/button";
 import { TransparentButtonKbd } from "@/components/ui/transparent-button-kbd";
@@ -268,15 +269,19 @@ export function EditClient({ initialFiles }: EditClientProps) {
         {/* Search Bar */}
         <Card>
           <CardContent className="p-4">
-            <div className="relative">
+            <div className="relative flex items-center">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
               <Input
+                id="search"
                 type="text"
                 placeholder="搜索文件 ID、标题、课程名称或 ISBN..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9 pr-9"
               />
+              <Label htmlFor="search">
+                <LabelKbd>s</LabelKbd>
+              </Label>
               {searchQuery && (
                 <Button
                   variant="ghost"
