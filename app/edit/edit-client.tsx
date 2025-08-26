@@ -282,11 +282,9 @@ export function EditClient({ initialFiles }: EditClientProps) {
                 onFocus={() => setSearchBarFocused(true)}
                 onBlur={() => setSearchBarFocused(false)}
               />
-              {!searchBarFocused && (
-                <Label htmlFor="search" className="absolute right-6">
-                  <LabelKbd>s</LabelKbd>
-                </Label>
-              )}
+              <Label htmlFor="search" className="absolute right-6 hidden">
+                <LabelKbd>s</LabelKbd>
+              </Label>
               {searchQuery && (
                 <Button
                   variant="ghost"
