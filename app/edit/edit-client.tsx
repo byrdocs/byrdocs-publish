@@ -28,7 +28,6 @@ export function EditClient({ initialFiles }: EditClientProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [displayedCount, setDisplayedCount] = useState(ITEMS_PER_BATCH);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [searchBarFocused, setSearchBarFocused] = useState(false);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
   const router = useRouter();
@@ -279,8 +278,6 @@ export function EditClient({ initialFiles }: EditClientProps) {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9 pr-9"
-                onFocus={() => setSearchBarFocused(true)}
-                onBlur={() => setSearchBarFocused(false)}
               />
               <Label htmlFor="search" className="absolute right-6 hidden">
                 <LabelKbd>s</LabelKbd>
