@@ -25,7 +25,7 @@ import { CodeRenderer } from "./code-renderer"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { getStatusConfig } from "../lib/file-status-icon"
 import { TransparentButtonKbd } from "@/components/ui/transparent-button-kbd"
-
+import { useTopLoader } from 'nextjs-toploader';
 interface FileChangeItemProps {
   fileChange: FileChange
   onUpdate: (id: string, content: string) => Promise<void> | void
@@ -38,6 +38,7 @@ export function FileChangeItem({ fileChange, onUpdate, onRevert }: FileChangeIte
   const [editContent, setEditContent] = useState(fileChange.content || "")
   const [showRevertDialog, setShowRevertDialog] = useState(false)
   const { actualTheme } = useTheme()
+  const loader = useTopLoader()
   const router = useRouter()
 
   // Initialize highlight.js for YAML
@@ -153,8 +154,9 @@ export function FileChangeItem({ fileChange, onUpdate, onRevert }: FileChangeIte
                     variant="ghost"
                     title="编辑"
                     onClick={(e) => {
-                    e.stopPropagation()
-                    router.push(`/edit/${fileChange.md5Hash || fileChange.id}`)
+                      e.stopPropagation()
+                      loader.start()
+                      router.push(`/edit/${fileChange.md5Hash || fileChange.id}`)
                     }}
                     className="h-7 w-7 sm:h-8 sm:w-8 p-0"
                 >

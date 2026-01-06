@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button, ButtonKbd, ShortcutProvider } from "@/components/ui/button";
 import {
   Card,
@@ -35,6 +35,8 @@ import { GithubIcon } from "@/components/icon/github";
 import { TransparentButtonKbd } from "@/components/ui/transparent-button-kbd";
 import { BackToHome } from "@/components/back-to-home";
 import { useAuth } from "@/components/auth-provider";
+import { useTopLoader } from 'nextjs-toploader';
+import Image from "next/image";
 import Link from "next/link";
 
 export default function GitHubSetupPage() {
@@ -46,14 +48,48 @@ export default function GitHubSetupPage() {
   const [bindingStep, setBindingStep] = useState<'select' | 'confirm' | 'success'>('select');
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const loader = useTopLoader();
   const { user, isLoading, refreshBinding } = useAuth();
+
+  const loadCurrentBinding = useCallback(async () => {
+    try {
+      const binding = await getCurrentBinding();
+      setCurrentBinding(binding);
+      if (binding) {
+        setSelectedRepo(binding.repository);
+        setBindingStep('confirm');
+      }
+    } catch (error) {
+      console.error('Failed to load current binding:', error);
+    }
+  }, []);
+
+  const fetchRepositories = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Fetch repositories and refresh binding in parallel
+      const [repos] = await Promise.all([
+        getAvailableRepositories(),
+        loadCurrentBinding() // Also refresh current binding
+      ]);
+      setRepositories(repos);
+    } catch (err) {
+      setError('获取仓库列表失败，请稍后重试');
+      console.error('Error fetching repositories:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [loadCurrentBinding]);
 
   // Redirect to login if not authenticated
   useEffect(() => {
     if (!isLoading && !user) {
+      loader.start()
       router.push(`/login?to=${encodeURIComponent('/bind')}`);
     }
-  }, [user, isLoading, router]);
+  }, [user, isLoading, router, loader]);
 
   // Load current binding and repositories on mount
   useEffect(() => {
@@ -62,7 +98,7 @@ export default function GitHubSetupPage() {
       loadCurrentBinding();
       fetchRepositories();
     }
-  }, [user, isLoading]);
+  }, [user, isLoading, loadCurrentBinding, fetchRepositories]);
 
   // Refresh repositories when page gains focus
   useEffect(() => {
@@ -82,39 +118,7 @@ export default function GitHubSetupPage() {
       window.removeEventListener('focus', handleFocus);
       document.removeEventListener('visibilitychange', handleFocus);
     };
-  }, [loading]);
-
-  const loadCurrentBinding = async () => {
-    try {
-      const binding = await getCurrentBinding();
-      setCurrentBinding(binding);
-      if (binding) {
-        setSelectedRepo(binding.repository);
-        setBindingStep('confirm');
-      }
-    } catch (error) {
-      console.error('Failed to load current binding:', error);
-    }
-  };
-
-  const fetchRepositories = async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      // Fetch repositories and refresh binding in parallel
-      const [repos] = await Promise.all([
-        getAvailableRepositories(),
-        loadCurrentBinding() // Also refresh current binding
-      ]);
-      setRepositories(repos);
-    } catch (err) {
-      setError('获取仓库列表失败，请稍后重试');
-      console.error('Error fetching repositories:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [loading, fetchRepositories]);
 
   const handleSelectRepository = (repo: Repository) => {
     setSelectedRepo(repo);
@@ -146,6 +150,7 @@ export default function GitHubSetupPage() {
   };
 
   const handleReturnHome = () => {
+    loader.start()
     router.push('/');
   };
 
@@ -200,9 +205,11 @@ export default function GitHubSetupPage() {
               </CardHeader>
               <CardContent>
                 <div className="flex items-center space-x-4">
-                  <img
+                  <Image
                     src={currentBinding.repository.owner.avatar_url}
                     alt={currentBinding.repository.owner.login}
+                    width={48}
+                    height={48}
                     className="w-12 h-12 rounded-full"
                   />
                   <div>
@@ -310,7 +317,7 @@ export default function GitHubSetupPage() {
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <Avatar className="rounded-full w-10 h-10 bg-blue-100/40 dark:bg-blue-900/40 flex items-center justify-center">
+                      <Avatar className="rounded-full w-10 h-10 bg-blue-100/40 dark:bg-blue-900/40 flex items-center justify-center aspect-square">
                         <AvatarImage
                           src="/logo.png"
                           alt="@byrdocs"
@@ -416,9 +423,11 @@ export default function GitHubSetupPage() {
                                   : "text-muted-foreground"
                               }`}
                             />
-                            <img
+                            <Image
                               src={repo.owner.avatar_url}
                               alt={repo.owner.login}
+                              width={40}
+                              height={40}
                               className="w-10 h-10 rounded-full"
                             />
                             <div>

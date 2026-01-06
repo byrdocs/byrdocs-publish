@@ -71,6 +71,7 @@
     "lucide-react": "^0.454.0",
     "next": "15.2.4",
     "next-themes": "^0.4.4",
+    "nextjs-toploader": "^3.9.17",
     "pinyin": "^4.0.0",
     "prisma": "^6.10.1",
     "react": "^19",

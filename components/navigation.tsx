@@ -17,12 +17,15 @@ import {
   GitBranch,
 } from 'lucide-react';
 import { GithubIcon } from './icon/github';
+import { useTopLoader } from 'nextjs-toploader';
 
 export function Navigation() {
   const { user, binding, login, logout, isBindingLoading } = useAuth();
+  const loader = useTopLoader();
   const router = useRouter();
 
   const handleBindingClick = () => {
+    loader.start();
     router.push('/bind');
   };
 

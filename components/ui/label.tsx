@@ -168,7 +168,7 @@ const Label = React.forwardRef<
         clearTimeout(timeoutRef.current)
       }
     }
-  }, [shortcut, htmlFor, shortcutState])
+  }, [shortcut, htmlFor, shortcutState, focusElement])
 
   return (
     <LabelShortcutContext.Provider value={{ registerShortcut, shortcutState }}>

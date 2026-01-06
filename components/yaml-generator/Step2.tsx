@@ -17,6 +17,7 @@ import { useRouter } from "next/navigation";
 import { FileType } from "@/lib/types";
 import { extractMD5FromURL, extractFileTypeFromURL, extractFileNameFromURL, validateURLFileType } from "@/lib/validate";
 import FileUpload from "@/components/file-upload";
+import { useTopLoader } from "nextjs-toploader";
 
 interface Step2Props {
   fileType: FileType;
@@ -54,6 +55,7 @@ export function Step2({
   metadata2Data,
 }: Step2Props) {
   const router = useRouter();
+  const loader = useTopLoader();
 
   const checkForDuplicateId = (id: string): boolean => {
     return metadata2Data.some((item: any) => item.id === id);
@@ -65,6 +67,7 @@ export function Step2({
     const currentId = formData.id;
     if (currentId && checkForDuplicateId(currentId)) {
       // Redirect to edit page if duplicate ID found
+      loader.start();
       router.push(`/edit/${currentId}`);
       return;
     }

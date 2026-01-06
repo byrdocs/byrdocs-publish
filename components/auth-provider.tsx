@@ -1,11 +1,12 @@
 "use client";
 
-import { createContext, useContext, ReactNode, useState, useEffect } from 'react';
+import { createContext, useContext, ReactNode, useState, useEffect, useCallback } from 'react';
 import { getCurrentUser } from '@/lib/auth-actions';
 import { getCurrentBinding, type UserBinding } from '@/app/bind/actions';
 import type { UserInfo } from '@/lib/auth';
 import { deleteServerCookie, getServerCookie } from '@/lib/server-cookie';
 import { useRouter, usePathname } from 'next/navigation';
+import { useTopLoader } from 'nextjs-toploader';
 
 interface AuthContextType {
   token: string | null;
@@ -37,6 +38,7 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children, initialUser = null, initialToken = null, syncOnFocus = false }: AuthProviderProps) {
+  const loader = useTopLoader();
   const router = useRouter();
   const pathname = usePathname();
   const [token, setToken] = useState<string | null>(initialToken);
@@ -67,7 +69,7 @@ export function AuthProvider({ children, initialUser = null, initialToken = null
     }
   };
 
-  const refreshBinding = async () => {
+  const refreshBinding = useCallback(async () => {
     if (!user) return;
     
     try {
@@ -80,10 +82,11 @@ export function AuthProvider({ children, initialUser = null, initialToken = null
     } finally {
       setIsBindingLoading(false);
     }
-  };
+  }, [user]);
 
   const login = (currentPath?: string) => {
     const redirectTo = currentPath ? `?to=${encodeURIComponent(currentPath)}` : '';
+    loader.start()
     router.push(`/login${redirectTo}`);
   };
 
@@ -95,6 +98,7 @@ export function AuthProvider({ children, initialUser = null, initialToken = null
     
     // Redirect to home page if not already on / or /add
     if (pathname !== '/' && pathname !== '/add') {
+      loader.start()
       router.push('/');
     }
   };
@@ -111,7 +115,7 @@ export function AuthProvider({ children, initialUser = null, initialToken = null
     if (user && !isLoading) {
       refreshBinding();
     }
-  }, [user, isLoading]);
+  }, [user, isLoading, refreshBinding]);
 
   // Sync authentication state on window focus
   useEffect(() => {
