@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getRequestContext } from '@cloudflare/next-on-pages';
 import { getPrismaClient } from '@/lib/db';
 import { Webhooks } from '@octokit/webhooks';
+import { getInstallationAccessToken } from '@/lib/github';
 
 export const runtime = 'edge';
 
@@ -84,7 +85,7 @@ async function isByrdocsArchiveFork(repoFullName: string, githubToken?: string):
 }
 
 // Helper function to find byrdocs-archive fork from repository list using heuristics
-async function findByrdocsArchiveFork(repositories?: Array<{ name: string; full_name: string; private: boolean }>): Promise<string | null> {
+async function findByrdocsArchiveFork(repositories?: Array<{ name: string; full_name: string; private: boolean }>, githubToken?: string): Promise<string | null> {
   if (!repositories || repositories.length === 0) {
     return null;
   }
@@ -107,7 +108,7 @@ async function findByrdocsArchiveFork(repositories?: Array<{ name: string; full_
     console.log(`Checking ${namedRepos.length} repositories named 'byrdocs-archive' first`);
     const namedRepoPromises = namedRepos.map(async (repo) => {
       console.log(`Checking named repo: ${repo.full_name}`);
-      const isFork = await isByrdocsArchiveFork(repo.full_name);
+      const isFork = await isByrdocsArchiveFork(repo.full_name, githubToken);
       return isFork ? repo.name : null;
     });
 
@@ -124,7 +125,7 @@ async function findByrdocsArchiveFork(repositories?: Array<{ name: string; full_
     console.log(`No byrdocs-archive fork found in named repos, checking ${otherRepos.length} other repositories`);
     const otherRepoPromises = otherRepos.map(async (repo) => {
       console.log(`Checking other repo: ${repo.full_name}`);
-      const isFork = await isByrdocsArchiveFork(repo.full_name);
+      const isFork = await isByrdocsArchiveFork(repo.full_name, githubToken);
       return isFork ? repo.name : null;
     });
 
@@ -203,13 +204,21 @@ export async function POST(request: NextRequest) {
     switch (payload.action) {
       case 'created': {
         if (!payload.installation) break;
-        
+
         const { installation, repositories } = payload;
         console.log('Installation created, processing repositories:', repositories?.length || 0);
-        
+
+        // Get installation access token to avoid rate limiting
+        let githubToken: string | undefined;
+        try {
+          githubToken = await getInstallationAccessToken(installation.id);
+        } catch (error) {
+          console.warn('Failed to get installation token, proceeding without authentication:', error);
+        }
+
         // Find byrdocs-archive fork
-        const repositoryName = await findByrdocsArchiveFork(repositories);
-        
+        const repositoryName = await findByrdocsArchiveFork(repositories, githubToken);
+
         await upsertInstallation(
           installation.id.toString(),
           installation.account.login,
@@ -217,9 +226,9 @@ export async function POST(request: NextRequest) {
           repositoryName,
           false // not suspended on creation
         );
-        
+
         console.log(
-          repositoryName 
+          repositoryName
             ? `Installation ${installation.id} created for ${installation.account.login} with byrdocs-archive fork: ${repositoryName}`
             : `Installation ${installation.id} created for ${installation.account.login} (no byrdocs-archive fork found)`
         );
@@ -228,26 +237,34 @@ export async function POST(request: NextRequest) {
       
       case 'added': {
         if (!payload.installation || !payload.repositories_added) break;
-        
+
         const { installation, repositories_added } = payload;
-        
+
         // Heuristic 2: If database already has a repo, don't process added event
         const currentInstallation = await prisma.gitHubInstallation.findUnique({
           where: {
             installationId: installation.id.toString(),
           },
         });
-        
+
         if (currentInstallation?.repositoryName) {
           console.log(`Installation ${installation.id} already has repository ${currentInstallation.repositoryName}, skipping added event`);
           break;
         }
-        
+
         console.log('Repositories added to installation:', repositories_added.length);
-        
+
+        // Get installation access token to avoid rate limiting
+        let githubToken: string | undefined;
+        try {
+          githubToken = await getInstallationAccessToken(installation.id);
+        } catch (error) {
+          console.warn('Failed to get installation token, proceeding without authentication:', error);
+        }
+
         // Check if any of the added repositories is a byrdocs-archive fork
-        const repositoryName = await findByrdocsArchiveFork(repositories_added);
-        
+        const repositoryName = await findByrdocsArchiveFork(repositories_added, githubToken);
+
         if (repositoryName) {
           await upsertInstallation(
             installation.id.toString(),
@@ -256,7 +273,7 @@ export async function POST(request: NextRequest) {
             repositoryName,
             currentInstallation?.isSuspended || false
           );
-          
+
           console.log(`byrdocs-archive fork ${repositoryName} added to installation ${installation.id}`);
         }
         break;

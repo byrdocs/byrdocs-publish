@@ -20,6 +20,7 @@ import {
   Info,
   ArrowRight,
   ArrowLeft,
+  LogOut,
 } from "lucide-react";
 import { Avatar } from "@radix-ui/react-avatar";
 import { AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -49,7 +50,7 @@ export default function GitHubSetupPage() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const loader = useTopLoader();
-  const { user, isLoading, refreshBinding } = useAuth();
+  const { user, isLoading, refreshBinding, logout } = useAuth();
 
   const loadCurrentBinding = useCallback(async () => {
     try {
@@ -391,8 +392,22 @@ export default function GitHubSetupPage() {
               </CardHeader>
               <CardContent>
                 {error && (
-                  <Alert className="mb-4">
-                    <AlertDescription>{error}</AlertDescription>
+                  <Alert className="mb-4 border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive">
+                    <AlertDescription className="space-y-3">
+                      <div>{error}</div>
+                      <div className="text-sm">
+                        如果重试多次后仍然无法获取仓库列表，建议尝试重新登录。
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={logout}
+                        className="flex items-center gap-2 border-destructive/50 text-destructive hover:bg-destructive/10"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        <span>登出</span>
+                      </Button>
+                    </AlertDescription>
                   </Alert>
                 )}
 

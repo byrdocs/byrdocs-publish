@@ -59,7 +59,7 @@ async function generateJWT(appId: string, privateKey: string): Promise<string> {
   return `${message}.${encodedSignature}`;
 }
 
-async function getInstallationAccessToken(installationId: number): Promise<string> {
+export async function getInstallationAccessToken(installationId: number): Promise<string> {
   const env = getRequestContext().env;
   const jwt = await generateJWT(env.APP_ID, env.GITHUB_APP_PRIVATE_KEY);
 
