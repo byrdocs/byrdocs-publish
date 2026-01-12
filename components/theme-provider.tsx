@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from "react";
 
 type Theme = 'dark' | 'light' | 'system';
 
@@ -29,10 +29,10 @@ export function ThemeProvider({ children, defaultTheme = 'system' }: ThemeProvid
   const [theme, setTheme] = useState<Theme>(defaultTheme);
   const [actualTheme, setActualTheme] = useState<'dark' | 'light'>('light');
 
-  const getSystemTheme = (): 'dark' | 'light' => {
+  const getSystemTheme = useCallback((): 'dark' | 'light' => {
     if (typeof window === 'undefined') return 'light';
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  };
+  }, []);
 
   const applyTheme = (appliedTheme: 'dark' | 'light') => {
     const root = document.documentElement;
@@ -43,18 +43,18 @@ export function ThemeProvider({ children, defaultTheme = 'system' }: ThemeProvid
     }
   };
 
-  const resolveTheme = (currentTheme: Theme): 'dark' | 'light' => {
+  const resolveTheme = useCallback((currentTheme: Theme): 'dark' | 'light' => {
     if (currentTheme === 'system') {
       return getSystemTheme();
     }
     return currentTheme;
-  };
+  }, [getSystemTheme]);
 
   useEffect(() => {
     const resolved = resolveTheme(theme);
     setActualTheme(resolved);
     applyTheme(resolved);
-  }, [theme]);
+  }, [theme, resolveTheme]);
 
   useEffect(() => {
     if (theme !== 'system') return;
@@ -70,7 +70,7 @@ export function ThemeProvider({ children, defaultTheme = 'system' }: ThemeProvid
     return () => {
       mediaQuery.removeEventListener('change', handleThemeChange);
     };
-  }, [theme]);
+  }, [theme, getSystemTheme]);
 
   const value: ThemeContextType = {
     theme,
@@ -83,4 +83,4 @@ export function ThemeProvider({ children, defaultTheme = 'system' }: ThemeProvid
       {children}
     </ThemeContext.Provider>
   );
-} 
+}

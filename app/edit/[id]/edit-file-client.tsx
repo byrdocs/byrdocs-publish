@@ -46,6 +46,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useArrayManipulation } from "@/hooks/useArrayManipulation";
 import { BackToPage } from "@/components/back-to-home";
+import { useTopLoader } from 'nextjs-toploader';
 
 interface EditFileClientProps {
   fileChange: FileChange | null;
@@ -63,6 +64,7 @@ export function EditFileClient({
   courseList,
 }: EditFileClientProps) {
   const router = useRouter();
+  const loader = useTopLoader();
   const searchParams = useSearchParams();
   const fromEdit = searchParams.get('from') === 'edit';
   const returnPath = fromEdit ? '/edit' : '/';
@@ -80,24 +82,9 @@ export function EditFileClient({
   const [showRestoreDialog, setShowRestoreDialog] = useState(false);
   const [showNoChangesDialog, setShowNoChangesDialog] = useState(false);
 
-  // Handle case where file doesn't exist
-  if (!fileChange) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold mb-2">文件不存在</h2>
-          <p className="text-muted-foreground mb-4">找不到指定的文件。</p>
-          <Link href={returnPath}>
-            <Button variant="outline">{fromEdit ? '返回文件列表' : '返回首页'}</Button>
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
   // Parse YAML data when component mounts
   useEffect(() => {
-    if (fileChange.content) {
+    if (fileChange && fileChange.content) {
       try {
         const yamlData = parse(fileChange.content);
         setFormData(yamlData);
@@ -139,7 +126,7 @@ export function EditFileClient({
         console.error("Failed to parse YAML:", error);
       }
     }
-  }, [fileChange.content]);
+  }, [fileChange?.content]);
 
   // Validation functions
   const validateCurrentForm = useCallback((): boolean => {
@@ -284,10 +271,11 @@ export function EditFileClient({
   };
 
   // Handle delete
-  const handleDelete = async () => {
+  const handleDelete = async (fileChange: FileChange) => {
     setIsLoading(true);
     try {
       await deleteFile(fileChange.id);
+      loader.start()
       router.push(returnPath);
     } catch (error) {
       console.error("Failed to delete file:", error);
@@ -297,7 +285,7 @@ export function EditFileClient({
   };
 
   // Handle discard changes
-  const handleDiscardChanges = async () => {
+  const handleDiscardChanges = async (fileChange: FileChange) => {
     setShowDiscardDialog(false);
     setIsLoading(true);
     try {
@@ -305,6 +293,7 @@ export function EditFileClient({
       
       if (fileChange.status === 'created') {
         // For newly created files, go back to the return path
+        loader.start()
         router.push(returnPath);
       } else {
         // For modified files, refresh the current page
@@ -318,7 +307,7 @@ export function EditFileClient({
   };
 
   // Handle restore file (for deleted files)
-  const handleRestoreFile = async () => {
+  const handleRestoreFile = async (fileChange: FileChange) => {
     setShowRestoreDialog(false);
     setIsLoading(true);
     try {
@@ -332,7 +321,7 @@ export function EditFileClient({
   };
 
   // Handle save
-  const handleSave = async () => {
+  const handleSave = async (fileChange: FileChange) => {
     if (!formData || !validateCurrentForm()) {
       const highlightIds = getHighlightedFieldIds();
       setHighlightedFields(highlightIds);
@@ -393,7 +382,7 @@ export function EditFileClient({
         
         await createOrUpdateFileChange(fileChange.id, yamlContent, false);
       }
-
+      loader.start()
       router.push(returnPath);
     } catch (error) {
       console.error("Failed to save file:", error);
@@ -403,6 +392,20 @@ export function EditFileClient({
   };
 
   // Handle deleted files
+  if (!fileChange) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold mb-2">文件不存在</h2>
+          <p className="text-muted-foreground mb-4">找不到指定的文件。</p>
+          <Link href={returnPath}>
+            <Button variant="outline">{fromEdit ? '返回文件列表' : '返回首页'}</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   if (fileChange.status === 'deleted') {
     return (
       <ShortcutProvider>
@@ -416,7 +419,7 @@ export function EditFileClient({
               <p className="text-muted-foreground mb-4">此文件已被标记为删除，无法编辑。</p>
               <Button
                 variant="outline"
-                onClick={handleRestoreFile}
+                onClick={() => handleRestoreFile(fileChange)}
                 disabled={isLoading}
               >
                 {isLoading && <RefreshCw className="h-4 w-4 mr-2 animate-spin" />}
@@ -493,7 +496,7 @@ export function EditFileClient({
             <Button
               variant="destructive"
               className="flex-1"
-              onClick={handleDelete}
+              onClick={() => handleDelete(fileChange)}
               disabled={isLoading}
             >
               <Trash2 className="h-4 w-4 mr-2" />
@@ -607,7 +610,7 @@ export function EditFileClient({
             )}
             <div className="flex justify-end w-full mt-4">
               <Button
-                onClick={handleSave}
+                onClick={() => handleSave(fileChange)}
                 disabled={isLoading}
                 className="bg-green-600 hover:bg-green-600/90 dark:bg-green-800 dark:hover:bg-green-800/90 text-white w-full sm:w-auto"
               >
@@ -679,7 +682,7 @@ export function EditFileClient({
               </Button>
               <Button
                 variant="destructive"
-                onClick={handleDiscardChanges}
+                onClick={() => handleDiscardChanges(fileChange)}
                 disabled={isLoading}
               >
                 {isLoading && <RefreshCw className="h-4 w-4 mr-2 animate-spin" />}
@@ -707,7 +710,7 @@ export function EditFileClient({
                 取消
               </Button>
               <Button
-                onClick={handleRestoreFile}
+                onClick={() => handleRestoreFile(fileChange)}
                 disabled={isLoading}
               >
                 {isLoading && <RefreshCw className="h-4 w-4 mr-2 animate-spin" />}

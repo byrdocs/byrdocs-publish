@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { handleGitHubCallback } from './actions';
 import { useAuth } from '@/components/auth-provider';
 import { Loader2 } from 'lucide-react';
+import { useTopLoader } from 'nextjs-toploader';
 
 export const runtime = 'edge';
 
@@ -14,6 +15,7 @@ function GitHubCallbackContent() {
   const state = searchParams.get('state');
   const router = useRouter();
   const { refreshUser, refreshBinding } = useAuth();
+  const loader = useTopLoader();
   useEffect(() => {
     if (code) {
       handleGitHubCallback(code, state || undefined).then(async (redirectUrl) => {
@@ -23,12 +25,13 @@ function GitHubCallbackContent() {
         }
         await refreshUser();
         await refreshBinding();
+        loader.start();
         router.push(redirectUrl);
       }).catch((error) => {
         console.error('Failed to handle GitHub callback:', error);
       });
     }
-  }, [code, state]);
+  }, [code, state, refreshUser, refreshBinding, router, loader]);
 
   if (!code) {
     return (

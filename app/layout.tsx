@@ -5,6 +5,7 @@ import { EscapeHandler } from '@/components/escape-handler'
 import { AuthProvider } from '@/components/auth-provider'
 import { Navigation } from '@/components/navigation'
 import { Footer } from '@/components/footer'
+import NextTopLoader from 'nextjs-toploader';
 import { getUserInfo, getTokenFromCookie } from '@/lib/auth'
 
 export const runtime = 'edge'
@@ -34,6 +35,7 @@ export default async function RootLayout({
       <body className="min-h-screen flex flex-col">
         <ThemeProvider>
           <AuthProvider initialUser={initialUser} initialToken={initialToken} syncOnFocus={true}>
+            <NextTopLoader />
             <EscapeHandler />
             <Navigation />
             <main className="flex-1">

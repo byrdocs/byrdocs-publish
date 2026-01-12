@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { Button, ButtonKbd } from "./ui/button";
 import { ArrowLeft } from "lucide-react";
+import { useTopLoader } from 'nextjs-toploader';
 
 interface BackToPageProps {
   shortcut?: string;
@@ -13,12 +14,16 @@ interface BackToPageProps {
 
 export function BackToPage({ shortcut, children, path }: BackToPageProps) {
   const router = useRouter();
+  const loader = useTopLoader();
 
   return (
     <div>
       <Button
         variant="ghost"
-        onClick={() => router.push(path)}
+        onClick={() => {
+          loader.start()
+          router.push(path)
+        }}
         className="flex items-center text-muted-foreground p-4 h-12 w-full justify-start font-normal group"
       >
         <span className="transition-transform duration-200 group-hover:-translate-x-1">

@@ -13,7 +13,7 @@ import { deleteFile, revertFileChange } from "./actions";
 import { useDebounce } from "@/hooks/use-debounce";
 import { BookData, TestData, DocData } from "@/lib/types";
 import { parse } from "yaml";
-import Link from "next/link";
+import { useTopLoader } from 'nextjs-toploader';
 import { BackToHome } from "@/components/back-to-home";
 import { useRouter } from "next/navigation";
 
@@ -31,6 +31,7 @@ export function EditClient({ initialFiles }: EditClientProps) {
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
   const router = useRouter();
+  const loader = useTopLoader();
 
   // Filter files based on search query
   const filteredFiles = useMemo(() => {
@@ -246,6 +247,7 @@ export function EditClient({ initialFiles }: EditClientProps) {
             <Button 
               variant="outline" 
               onClick={() => {
+                loader.start()
                 router.push("/add")
               }}
             >
@@ -256,6 +258,7 @@ export function EditClient({ initialFiles }: EditClientProps) {
             <Button
               className="bg-green-600 hover:bg-green-600/90 dark:bg-green-800 dark:hover:bg-green-800/90 text-white"
               onClick={() => {
+                loader.start()
                 router.push("/")
               }}
             >

@@ -13,6 +13,7 @@ import { CopyButton } from "@/components/copy-button";
 import hljs from "highlight.js/lib/core";
 import yaml from "highlight.js/lib/languages/yaml";
 import { useAuth } from "@/components/auth-provider";
+import { useTopLoader } from "nextjs-toploader";
 
 // 注册 YAML 语言支持
 hljs.registerLanguage("yaml", yaml);
@@ -49,6 +50,7 @@ export function Step4({
   step,
 }: Step4Props) {
   const router = useRouter();
+  const loader = useTopLoader();
   
   return (
     <div className="space-y-6">
@@ -90,7 +92,10 @@ export function Step4({
               </p>
             </div>
             <Button 
-              onClick={() => router.push('/')}
+              onClick={() => {
+                loader.start();
+                router.push('/');
+              }}
               className="flex items-center bg-green-600 hover:bg-green-600/90 dark:bg-green-800 dark:hover:bg-green-800/90 text-white"
             >
               <span>返回主页</span>

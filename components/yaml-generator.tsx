@@ -37,11 +37,13 @@ import { validateISBN } from "@/lib/isbn";
 import { useTheme } from "./theme-provider";
 import { createFileChange } from "@/app/file-changes/actions";
 import { useAuth } from "@/components/auth-provider";
+import { useTopLoader } from "nextjs-toploader";
 
 export default function YamlGenerator() {
   const { actualTheme } = useTheme();
   const { user } = useAuth();
   const router = useRouter();
+  const loader = useTopLoader();
   // 课程列表状态
   const [courseList, setCourseList] = useState<string[]>([]);
   // 元数据状态
@@ -119,7 +121,7 @@ export default function YamlGenerator() {
     } as BookData,
   });
 
-  const submitYaml = async () => {
+  const submitYaml = useCallback(async () => {
     if (isSubmitting) return;
     
     setIsSubmitting(true);
@@ -145,7 +147,7 @@ export default function YamlGenerator() {
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [isSubmitting, fileType, formData]);
 
   const downloadYaml = () => {
     const yamlContent = generateYaml(fileType, formData);
@@ -160,14 +162,6 @@ export default function YamlGenerator() {
     URL.revokeObjectURL(url);
   };
 
-  const createNewMetadata = () => {
-    // 重置所有状态
-    setStep(1);
-    setUrlValidationError("");
-    setSubmissionSuccess(false);
-    resetFormCompletely("book");
-  };
-
   // 检查是否应该显示预览按钮
   const shouldShowPreviewButton = () => {
     return (
@@ -178,7 +172,7 @@ export default function YamlGenerator() {
     );
   };
 
-  const resetFormCompletely = (type: FileType) => {
+  const resetFormCompletely = useCallback((type: FileType) => {
     setFileType(type);
     setUrlValidationError(""); // 清除验证错误
     setInputMethod('upload'); // 重置为上传文件方式
@@ -223,12 +217,20 @@ export default function YamlGenerator() {
       type,
       data: initialData,
     });
-  };
+  }, []);
+
+  const createNewMetadata = useCallback(() => {
+    // 重置所有状态
+    setStep(1);
+    setUrlValidationError("");
+    setSubmissionSuccess(false);
+    resetFormCompletely("book");
+  }, [resetFormCompletely]);
 
   // Array manipulation helpers
   const { updateArrayItem, removeArrayItem, addArrayItem } = useArrayManipulation(setFormData);
 
-  const resetForm = (type: FileType) => {
+  const resetForm = useCallback((type: FileType) => {
     setFileType(type);
     setUrlValidationError(""); // 清除验证错误
     
@@ -271,7 +273,7 @@ export default function YamlGenerator() {
       type,
       data: initialData,
     }));
-  };
+  }, []);
 
   // 检查重复ID
   const checkForDuplicateId = useCallback((id: string): boolean => {
@@ -279,7 +281,7 @@ export default function YamlGenerator() {
   }, [metadata2Data]);
 
   // 验证步骤2
-  const validateStep2 = (): boolean => {
+  const validateStep2 = useCallback((): boolean => {
     if (!formData.id || !formData.url) {
       return false;
     }
@@ -287,10 +289,10 @@ export default function YamlGenerator() {
     // 检查URL格式是否有效
     const validation = validateURLFileType(formData.url, fileType);
     return validation.isValid;
-  };
+  }, [formData, fileType]);
 
   // 验证步骤3
-  const validateStep3 = (): boolean => {
+  const validateStep3 = useCallback((): boolean => {
     if (fileType === "book") {
       const data = formData.data as BookData;
       const hasValidISBN = data.isbn.some(
@@ -326,10 +328,10 @@ export default function YamlGenerator() {
       );
     }
     return false;
-  };
+  }, [fileType, formData.data]);
 
   // 获取需要高亮的字段ID
-  const getHighlightedFieldIds = (): string[] => {
+  const getHighlightedFieldIds = useCallback((): string[] => {
     const fieldIds: string[] = [];
     
     if (fileType === "book") {
@@ -385,7 +387,7 @@ export default function YamlGenerator() {
     }
     
     return fieldIds;
-  };
+  }, [fileType, formData.data]);
 
   // 键盘快捷键处理
   useEffect(() => {
@@ -414,6 +416,7 @@ export default function YamlGenerator() {
             const currentId = formData.id;
             if (currentId && checkForDuplicateId(currentId)) {
               // Redirect to edit page if duplicate ID found
+              loader.start();
               router.push(`/edit/${currentId}`);
               return;
             }
@@ -473,6 +476,7 @@ export default function YamlGenerator() {
             const currentId = formData.id;
             if (currentId && checkForDuplicateId(currentId)) {
               // Redirect to edit page if duplicate ID found
+              loader.start();
               router.push(`/edit/${currentId}`);
               return;
             }
@@ -508,7 +512,7 @@ export default function YamlGenerator() {
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [step, selectedTypeIndex, validateStep2, validateStep3, getHighlightedFieldIds, resetForm, setHighlightedFields, setStep, submitYaml, createNewMetadata, hasDownloaded, submissionSuccess, router, checkForDuplicateId, formData.id]);
+  }, [step, selectedTypeIndex, validateStep2, validateStep3, getHighlightedFieldIds, resetForm, setHighlightedFields, setStep, submitYaml, createNewMetadata, hasDownloaded, submissionSuccess, router, loader, checkForDuplicateId, formData.id]);
 
   useEffect(() => {
     if (previousStep === 3 && step !== 3) {
@@ -551,7 +555,7 @@ export default function YamlGenerator() {
     }
     
     setPreviousStep(step);
-  }, [step, previousStep, fileType, formData.url, showPreview, previewWasOpen]);
+  }, [step, previousStep, fileType, formData.url, formData.data, showPreview, previewWasOpen]);
 
   useEffect(() => {
     if (showPreview) {
@@ -576,14 +580,6 @@ export default function YamlGenerator() {
       setBlobUrl('');
     }
   }, [uploadedFile]);
-
-  useEffect(() => {
-    return () => {
-      if (blobUrl) {
-        URL.revokeObjectURL(blobUrl);
-      }
-    };
-  }, []);
 
   return (
       <div className="p-4 pt-0">

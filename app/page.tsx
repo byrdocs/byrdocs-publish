@@ -5,15 +5,19 @@ import { Plus, ArrowRight, Edit, ExternalLink } from "lucide-react";
 import { FileChanges } from "@/components/file-change";
 import { useRouter } from "next/navigation";
 import { Button, ButtonKbd, ShortcutProvider } from "@/components/ui/button";
+import { useTopLoader } from 'nextjs-toploader';
 import Link from "next/link";
 
 export default function HomePage() {
   const router = useRouter();
+  const loader = useTopLoader();
   const handleAddFile = () => {
+    loader.start();
     router.push("/add");
   };
 
   const handleManageFiles = () => {
+    loader.start();
     router.push("/edit");
   };
 

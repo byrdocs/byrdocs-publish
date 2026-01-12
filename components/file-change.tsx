@@ -31,6 +31,7 @@ import {
 import { useAuth } from "@/components/auth-provider"
 import { useRouter } from "next/navigation"
 import { PrSuccessDialog } from "./pr-success-dialog"
+import { useTopLoader } from "nextjs-toploader"
 
 // Convert database result to FileChange format
 function convertToFileChange(result: FileChangeResult): FileChange {
@@ -49,6 +50,7 @@ function convertToFileChange(result: FileChangeResult): FileChange {
 export function FileChanges() {
   const { user, binding, isLoading: authLoading } = useAuth()
   const router = useRouter()
+  const loader = useTopLoader()
   const [fileChanges, setFileChanges] = useState<FileChange[] | null>(null)
   const [isCommitting, setIsCommitting] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
@@ -338,7 +340,10 @@ export function FileChanges() {
               ) : (
                 <div className="flex items-center gap-2">
                   <Button 
-                    onClick={() => router.push(!user ? '/login' : '/bind')} 
+                    onClick={() => {
+                      loader.start()
+                      router.push(!user ? '/login' : '/bind')
+                    }} 
                     className="bg-amber-600 hover:bg-amber-600/90 dark:bg-amber-700 dark:hover:bg-amber-700/90 text-white w-full sm:w-auto" 
                     size="sm"
                   >
