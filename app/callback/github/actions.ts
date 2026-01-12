@@ -29,8 +29,14 @@ async function exchangeCodeForToken(code: string): Promise<{ access_token: strin
     }),
   });
 
+  const response_json:JSON=await response.clone().json();
+  console.log(response_json);
+
   if (!response.ok) {
     throw new Error(`Failed to exchange code for token: ${response.statusText}`);
+  }
+  if (response_json.error) {
+    throw new Error(`Failed to exchange code for token: ${JSON.stringify(response_json)}`);
   }
 
   return response.json();
@@ -57,7 +63,6 @@ export async function handleGitHubCallback(code: string, state?: string) {
   try {
     // Exchange code for access token
     const { access_token } = await exchangeCodeForToken(code);
-    
     // Get GitHub user info
     const githubUser = await getGitHubUser(access_token);
     
