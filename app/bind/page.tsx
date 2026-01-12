@@ -310,7 +310,7 @@ export default function GitHubSetupPage() {
                 <div
                   onClick={() =>
                     window.open(
-                      "https://github.com/apps/byrdocs-publish",
+                      process.env.NEXT_PUBLIC_PUBLISH_APP_BASE_URL,
                       "_blank"
                     )
                   }
@@ -353,7 +353,7 @@ export default function GitHubSetupPage() {
                   </div>
                   <Button
                     onClick={() =>
-                      router.push("https://github.com/apps/byrdocs-publish/installations/new")
+                      router.push(`${process.env.NEXT_PUBLIC_PUBLISH_APP_BASE_URL}/installations/new`)
                     }
                     className="flex items-center space-x-1 w-full sm:w-auto"
                   >
@@ -499,7 +499,7 @@ export default function GitHubSetupPage() {
                       <Button
                         variant="outline"
                         onClick={() =>
-                          router.push("https://github.com/apps/byrdocs-publish/installations/new")
+                          router.push(`${process.env.NEXT_PUBLIC_PUBLISH_APP_BASE_URL}/installations/new`)
                         }
                         className="flex items-center space-x-1"
                       >

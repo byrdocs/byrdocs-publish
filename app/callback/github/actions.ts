@@ -13,7 +13,7 @@ interface GitHubUser {
 
 async function exchangeCodeForToken(code: string): Promise<{ access_token: string }> {
   const env = getRequestContext().env;
-  const origin = process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://publish.byrdocs.org';
+  const origin = process.env.NODE_ENV === 'development' ? process.env.NEXT_PUBLIC_DEV_SITE_BASE_URL : process.env.NEXT_PUBLIC_PUBLISH_SITE_BASE_URL;
   
   const response = await fetch('https://github.com/login/oauth/access_token', {
     method: 'POST',
@@ -30,7 +30,6 @@ async function exchangeCodeForToken(code: string): Promise<{ access_token: strin
   });
 
   const response_json:JSON=await response.clone().json();
-  console.log(response_json);
 
   if (!response.ok) {
     throw new Error(`Failed to exchange code for token: ${response.statusText}`);
