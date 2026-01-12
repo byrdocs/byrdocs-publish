@@ -599,7 +599,7 @@ function generateCommitMessage(fileChanges: any[]): { title: string; body: strin
 
   // Add signature line
   bodyLines.push('');
-  bodyLines.push('*使用 [BYR Docs Publish](https://publish.byrdocs.org) 发布*');
+  bodyLines.push(`*使用 [BYR Docs Publish](${process.env.NEXT_PUBLIC_PUBLISH_SITE_BASE_URL}) 发布*`);
   
   return { title, body: bodyLines.join('\n') };
 }

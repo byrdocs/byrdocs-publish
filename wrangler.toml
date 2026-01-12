@@ -4,7 +4,8 @@ compatibility_flags = ["nodejs_compat"]
 pages_build_output_dir = ".vercel/output/static"
 
 vars = { NODE_VERSION = "23.9.0" }
-d1_databases = [
-  { binding = "DB", database_name = "byrdocs-publish", database_id = "39a9a85a-5805-496f-9ac8-b72ac5f9acf5" }
-]
 
+[[d1_databases]]
+binding="DB"
+database_name = "byrdocs-publish"
+database_id = "5d137ad1-e28d-49d2-be28-fb9713142fd0"

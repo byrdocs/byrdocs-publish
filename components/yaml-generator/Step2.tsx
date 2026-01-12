@@ -157,7 +157,7 @@ export function Step2({
             allowedTypes={fileType === "book" ? ["pdf"] : fileType === "test" ? ["pdf"] : ["pdf", "zip"]}
             onUploadSuccess={(key: string, fileInfo?: { name: string; size: number }) => {
               // 构建完整的URL
-              const fullUrl = `https://byrdocs.org/files/${key}`;
+              const fullUrl = `${process.env.NEXT_PUBLIC_SITE_BASE_URL}/files/${key}`;
               const md5 = extractMD5FromURL(fullUrl);
               const detectedFileType = extractFileTypeFromURL(fullUrl, fileType);
               
@@ -228,7 +228,7 @@ export function Step2({
             <Input
               id="url"
               className="text-sm w-full pr-10"
-              placeholder="https://byrdocs.org/files/..."
+              placeholder={`${process.env.NEXT_PUBLIC_SITE_BASE_URL}/files/...`}
               value={formData.url}
               onChange={(e) => {
                 const url = e.target.value;

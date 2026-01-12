@@ -1,13 +1,13 @@
 import { FileType } from "./types";
 
-const cleanURL = (url: string): string => {
+const cleanURL = (url: string): URL => {
   try {
     const urlObj = new URL(url);
     urlObj.search = "";
     urlObj.hash = "";
-    return urlObj.toString();
+    return urlObj;
   } catch (error) {
-    return url;
+    return new URL(url);
   }
 };
 
@@ -82,16 +82,19 @@ export const validateURLFileType = (
   const cleanedUrl = cleanURL(url);
 
   // 首先验证URL格式
-  const urlFormatValidation = validateURLFormat(cleanedUrl);
+  const urlFormatValidation = validateURLFormat(cleanedUrl.toString());
   if (!urlFormatValidation.isValid) {
     return urlFormatValidation;
   }
 
+  if (cleanedUrl.origin !== process.env.NEXT_PUBLIC_SITE_BASE_URL) {
+      return { isValid: false, error: `URL 必须指向 ${process.env.NEXT_PUBLIC_SITE_BASE_URL}` };
+  }
   const urlPattern =
-    /^https:\/\/byrdocs\.org\/files\/([a-f0-9]{32})\.([a-zA-Z0-9]+)$/i;
-  const match = cleanedUrl.match(urlPattern);
+    /^\/files\/([a-f0-9]{32})\.([a-zA-Z0-9]+)$/i;
+  const match = cleanedUrl.pathname.match(urlPattern);
   if (!match) {
-    return { isValid: false, error: "无法从URL中检测到文件扩展名" };
+    return { isValid: false, error: "URL格式不正确" };
   }
 
   const extension = match[2].toLowerCase();
@@ -121,8 +124,8 @@ export const validateURLFileType = (
 export const extractMD5FromURL = (url: string): string => {
   const cleanedUrl = cleanURL(url);
   const urlPattern =
-    /^https:\/\/byrdocs\.org\/files\/([a-f0-9]{32})\.([a-zA-Z0-9]+)$/i;
-  const match = cleanedUrl.match(urlPattern);
+    /^\/files\/([a-f0-9]{32})\.([a-zA-Z0-9]+)$/i;
+  const match = cleanedUrl.pathname.match(urlPattern);
   return match ? match[1] : "";
 };
 
@@ -133,8 +136,8 @@ export const extractFileTypeFromURL = (
 ): string => {
   const cleanedUrl = cleanURL(url);
   const urlPattern =
-    /^https:\/\/byrdocs\.org\/files\/([a-f0-9]{32})\.([a-zA-Z0-9]+)$/i;
-  const match = cleanedUrl.match(urlPattern);
+    /^\/files\/([a-f0-9]{32})\.([a-zA-Z0-9]+)$/i;
+  const match = cleanedUrl.pathname.match(urlPattern);
   if (match) {
     const extension = match[2].toLowerCase();
 
@@ -152,8 +155,8 @@ export const extractFileTypeFromURL = (
 export const extractFileNameFromURL = (url: string): string => {
   const cleanedUrl = cleanURL(url);
   const urlPattern =
-    /^https:\/\/byrdocs\.org\/files\/([a-f0-9]{32}\.[a-zA-Z0-9]+)$/i;
-  const match = cleanedUrl.match(urlPattern);
+    /^\/files\/([a-f0-9]{32}\.[a-zA-Z0-9]+)$/i;
+  const match = cleanedUrl.pathname.match(urlPattern);
   return match ? match[1] : "";
 };
 
@@ -165,22 +168,22 @@ export const validateURLFormat = (
     return { isValid: true }; // 空URL不验证
   }
 
-  if (!url.startsWith("https://byrdocs.org/files/")) {
+  if (!url.startsWith(`${process.env.NEXT_PUBLIC_SITE_BASE_URL}/files/`)) {
     return {
       isValid: false,
-      error: "URL 必须以 https://byrdocs.org/files/ 开头",
+      error: `URL 必须以 ${process.env.NEXT_PUBLIC_SITE_BASE_URL}/files/ 开头`,
     };
   }
 
   // 提取文件部分
-  const filePart = url.replace("https://byrdocs.org/files/", "");
+  const filePart = url.replace(`${process.env.NEXT_PUBLIC_SITE_BASE_URL}/files/`, "");
 
   const dotIndex = filePart.lastIndexOf(".");
   if (dotIndex === -1) {
     return {
       isValid: false,
       error:
-        "URL中 缺少文件扩展名，格式应为：https://byrdocs.org/files/[MD5].[扩展名]",
+        `URL中 缺少文件扩展名，格式应为：${process.env.NEXT_PUBLIC_SITE_BASE_URL}/files/[MD5].[扩展名]`,
     };
   }
 
@@ -218,8 +221,8 @@ export const validateURLFormat = (
 
   // 检查是否有额外的路径或参数
   const fullPattern =
-    /^https:\/\/byrdocs\.org\/files\/[a-f0-9]{32}\.[a-zA-Z0-9]+$/i;
-  if (!fullPattern.test(url)) {
+    /^\/files\/[a-f0-9]{32}\.[a-zA-Z0-9]+$/i;
+  if (!fullPattern.test(new URL(url).pathname)) {
     return {
       isValid: false,
       error: "URL格式不正确，不能包含额外的路径或参数",

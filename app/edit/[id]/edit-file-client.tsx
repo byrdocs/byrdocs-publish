@@ -371,7 +371,7 @@ export function EditFileClient({
         finalFormData = {
           ...formData,
           id: newMd5,
-          url: `https://byrdocs.org/files/${newFileKey}`,
+          url: `${process.env.NEXT_PUBLIC_SITE_BASE_URL}/files/${newFileKey}`,
         };
 
         // Handle file re-upload: delete old record and create new one

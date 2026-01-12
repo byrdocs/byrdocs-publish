@@ -54,7 +54,7 @@ export default function YamlGenerator() {
     // 获取课程数据
     const fetchCourseData = async () => {
       try {
-        const response = await fetch('https://files.byrdocs.org/metadata2.json');
+        const response = await fetch(`${process.env.NEXT_PUBLIC_DATA_BASE_URL}/metadata.json`);
         const data: any = await response.json();
         
         // 保存完整的元数据
