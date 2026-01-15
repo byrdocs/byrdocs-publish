@@ -39,22 +39,19 @@ interface FileUploadProps {
   disableShortcuts?: boolean; // 禁用快捷键
 }
 
-interface S3Credentials {
-  access_key_id: string;
-  secret_access_key: string;
-  session_token: string;
-}
-
-interface S3UploadResponse {
+interface R2UploadResponse {
   success: boolean;
   code?: string;
   key?: string;
-  host?: string;
-  bucket?: string;
-  tags?: { status: string };
-  credentials?: S3Credentials;
+  uploadId?: string;
+  etag?: string;
   error?: string;
 }
+
+interface EtagArray {
+  partNumber: number,
+  etag: string,
+}[]
 
 const CHUNK_SIZE = 5 * 1024 * 1024; // 5MB
 
@@ -81,6 +78,7 @@ export default function FileUpload({
   const [highlightTypes, setHighlightTypes] = useState(false);
   const [uploadedKey, setUploadedKey] = useState<string>(''); // 保存上传成功的key
   const [fileExistsError, setFileExistsError] = useState<{ md5: string; extension: string } | null>(null); // 文件已存在错误信息
+  const [uploadSession, setUploadSession] = useState<{ key: string; uploadId: string } | null>(null);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -161,13 +159,12 @@ export default function FileUpload({
     });
   }, []);
 
-  // Get S3 upload credentials
-  const getS3Credentials = async (key: string, signal?: AbortSignal): Promise<S3UploadResponse> => {
+  // Start an R2 mpu session
+  const startR2Upload = async (key: string, signal?: AbortSignal): Promise<R2UploadResponse> => {
     if (!token) {
       throw new Error('No authentication token found');
     }
-
-    const response = await fetch('https://byrdocs.org/api/s3/upload', {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_BASE_URL}/api/r2/mpu-start`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -176,66 +173,115 @@ export default function FileUpload({
       body: JSON.stringify({ key }),
       signal,
     });
-
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-
     return response.json();
   };
 
-  // Upload file to S3 using AWS SDK Upload
-  const uploadToS3 = async (
+  // Upload one part for R2
+  const uploadR2Part = async (
+    key: string,
+    uploadId: string,
+    partNumber: number,
+    chunk: File,
+    signal?: AbortSignal,
+  ): Promise<R2UploadResponse> => {
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+    const formData = new FormData();
+    formData.append('key', key);
+    formData.append('uploadId', uploadId);
+    formData.append('partNumber', partNumber.toString());
+    formData.append('file', chunk);
+    const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_BASE_URL}/api/r2/mpu-uploadpart`,{
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+      body: formData,
+      signal,
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return response.json();
+  }
+
+  // Upload all parts to R2
+  const uploadToR2 = async (
+    key: string,
+    uploadId: string,
     file: File,
-    s3Config: S3UploadResponse,
-    signal?: AbortSignal
-  ): Promise<void> => {
-    if (!s3Config.host || !s3Config.bucket || !s3Config.credentials || !s3Config.key) {
-      throw new Error('Invalid S3 configuration');
-    }
+    signal?: AbortSignal,
+  ): Promise<EtagArray> => {
+    const partNumber = Math.ceil(file.size / CHUNK_SIZE);
+    const etagArray: EtagArray = [];
 
-    const s3Client = new S3Client({
-      region: 'auto',
-      endpoint: s3Config.host,
-      forcePathStyle: true,
-      credentials: {
-        accessKeyId: s3Config.credentials.access_key_id,
-        secretAccessKey: s3Config.credentials.secret_access_key,
-        sessionToken: s3Config.credentials.session_token,
-      },
-    });
+    for (let part = 0; part < partNumber; part++) {
+      const start = part * CHUNK_SIZE;
+      const end = Math.min(start + CHUNK_SIZE, file.size);
+      const chunk = file.slice(start, end);
 
-    const upload = new Upload({
-      client: s3Client,
-      params: {
-        Bucket: s3Config.bucket,
-        Key: s3Config.key,
-        Body: file,
-        Tagging: s3Config.tags ? Object.entries(s3Config.tags).map(([key, value]) => `${key}=${value}`).join('&') : undefined,
-      },
-      queueSize: 1,
-      partSize: CHUNK_SIZE,
-      leavePartsOnError: false,
-    });
-
-    upload.on("httpUploadProgress", (progress) => {
-      if (progress.total) {
-        const percentage = Math.round((progress.loaded! / progress.total) * 100);
-        setUploadProgress(percentage);
+      const response = await uploadR2Part(key, uploadId, part + 1, chunk);
+      if (!response.success || !response.etag) {
+        throw new Error(response.error || '上传分片失败');
       }
-    });
+      etagArray.push({ partNumber: part + 1, etag: response.etag });
 
-    // Handle abort signal
-    if (signal) {
-      signal.addEventListener('abort', () => {
-        upload.abort();
-      });
+      // Update upload progress
+      setUploadProgress(((part + 1) / partNumber) * 100);
     }
+    return etagArray;
+  }
 
-    await upload.done();
-  };
+  // Finish R2 mpu session
+  const finishR2Upload = async (
+    key: string,
+    uploadId: string,
+    parts: EtagArray,
+    signal?: AbortSignal,
+  ): Promise<R2UploadResponse> => {
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+    const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_BASE_URL}/api/r2/mpu-complete`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({ key, uploadId, parts }),
+      signal,
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return response.json();
+  }
 
-
+  // Abort R2 mpu session
+  const abortR2Upload = async (
+    key: string,
+    uploadId: string,
+  ): Promise<R2UploadResponse> => {
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+    const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_BASE_URL}/api/r2/mpu-abort`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({ key, uploadId }),
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return response.json();
+  }
 
   const validateAndSetFile = async (file: File) => {
     // Check file type
@@ -322,25 +368,30 @@ export default function FileUpload({
       const fileExtension = selectedFile.name.split('.').pop()?.toLowerCase();
       const key = `${md5Hash}.${fileExtension}`;
 
-      // Get S3 credentials
-      const s3Config = await getS3Credentials(key, abortControllerRef.current.signal);
-      
-      if (!s3Config.success) {
-        if (s3Config.code === 'FILE_EXISTS') {
-          const fileExtension = selectedFile.name.split('.').pop()?.toLowerCase();
+      // Start R2 upload session
+      const r2StartResponse = await startR2Upload(key);
+      if (!r2StartResponse.success || !r2StartResponse.uploadId) {
+        if (r2StartResponse.code === 'FILE_EXISTS') {
           setFileExistsError({ md5: md5Hash, extension: fileExtension || 'pdf' });
           setUploadStatus('error');
           return;
         }
-        throw new Error(s3Config.error || '获取上传凭证失败');
+        throw new Error(r2StartResponse.error || '未能开始上传');
       }
-
-      // Start uploading
       setUploadStatus('uploading');
-      await uploadToS3(selectedFile, s3Config, abortControllerRef.current.signal);
+      setUploadSession({ key, uploadId: r2StartResponse.uploadId });
+
+      // Start uploading parts
+      const etags = await uploadToR2(key, r2StartResponse.uploadId, selectedFile);
       
+      // Finish R2 upload session
+      const r2CompleteResponse = await finishR2Upload(key, r2StartResponse.uploadId, etags);
+      if (!r2CompleteResponse.success) {
+        throw new Error(r2CompleteResponse.error || '未能完成上传');
+      }
       setUploadStatus('success');
       setUploadedKey(key);
+      setUploadSession(null);
       onUploadSuccess(key, selectedFile ? { name: selectedFile.name, size: selectedFile.size } : undefined);
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') {
@@ -357,11 +408,22 @@ export default function FileUpload({
 
   const handleCancel = () => {
     if (abortControllerRef.current) {
+      if (uploadSession){
+        abortR2Upload(uploadSession.key, uploadSession.uploadId)
+      }
       abortControllerRef.current.abort();
     }
+    setUploadSession(null);
   };
 
   const handleRemoveFile = () => {
+    if (abortControllerRef.current) {
+      if (uploadSession){
+        abortR2Upload(uploadSession.key, uploadSession.uploadId)
+      }
+      abortControllerRef.current.abort();
+    }
+
     setSelectedFile(null);
     onFileSelected?.(null);
     setUploadStatus('idle');
@@ -370,22 +432,19 @@ export default function FileUpload({
     setErrorMessage('');
     setMd5Hash('');
     setUploadedKey('');
+    setUploadSession(null);
     setFileExistsError(null);
-    
+
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
-    
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-    
+
     onReset?.();
   };
 
   const handleUseExistingFile = () => {
     if (fileExistsError && onSwitchToUrl) {
-      const url = `https://byrdocs.org/files/${fileExistsError.md5}.${fileExistsError.extension}`;
+      const url = `${NEXT_PUBLIC_SITE_BASE_URL}/files/${fileExistsError.md5}.${fileExistsError.extension}`;
       
       setSelectedFile(null);
       onFileSelected?.(null);
@@ -583,7 +642,7 @@ export default function FileUpload({
                     {uploadedKey ? (
                       <span className="ml-1 text-green-600 font-mono break-all">
                         <a 
-                          href={`https://byrdocs.org/files/${uploadedKey}`}
+                          href={`${NEXT_PUBLIC_SITE_BASE_URL}/files/${uploadedKey}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="hover:underline"
