@@ -71,15 +71,15 @@ async function isByrdocsArchiveFork(repoFullName: string, githubToken?: string):
 
     const repoData: any = await response.json();
     
-    const isTargetFork = repoData.fork && repoData.parent?.full_name === 'byrdocs/byrdocs-archive';
+    const isTargetFork = repoData.fork && repoData.parent?.full_name === `${process.env.NEXT_PUBLIC_ARCHIVE_REPO_OWNER}/${process.env.NEXT_PUBLIC_ARCHIVE_REPO_NAME}`;
     
     if (isTargetFork) {
-      console.log(`✓ Confirmed: ${repoFullName} is a fork of byrdocs/byrdocs-archive`);
+      console.log(`✓ Confirmed: ${repoFullName} is a fork of ${process.env.NEXT_PUBLIC_ARCHIVE_REPO_OWNER}/${process.env.NEXT_PUBLIC_ARCHIVE_REPO_NAME}`);
     }
     
     return isTargetFork;
   } catch (error) {
-    console.error(`Error checking if ${repoFullName} is byrdocs-archive fork:`, error);
+    console.error(`Error checking if ${repoFullName} is ${process.env.NEXT_PUBLIC_ARCHIVE_REPO_NAME} fork:`, error);
     return false;
   }
 }
@@ -97,15 +97,15 @@ async function findByrdocsArchiveFork(repositories?: Array<{ name: string; full_
     return null;
   }
 
-  console.log(`Checking ${publicRepos.length} public repositories for byrdocs-archive fork`);
+  console.log(`Checking ${publicRepos.length} public repositories for ${process.env.NEXT_PUBLIC_ARCHIVE_REPO_NAME} fork`);
   
   // Heuristic 1: Check repositories named 'byrdocs-archive' first
-  const namedRepos = publicRepos.filter(repo => repo.name === 'byrdocs-archive');
-  const otherRepos = publicRepos.filter(repo => repo.name !== 'byrdocs-archive');
+  const namedRepos = publicRepos.filter(repo => repo.name === process.env.NEXT_PUBLIC_ARCHIVE_REPO_NAME);
+  const otherRepos = publicRepos.filter(repo => repo.name !== process.env.NEXT_PUBLIC_ARCHIVE_REPO_NAME);
   
   // First, check only repositories named 'byrdocs-archive'
   if (namedRepos.length > 0) {
-    console.log(`Checking ${namedRepos.length} repositories named 'byrdocs-archive' first`);
+    console.log(`Checking ${namedRepos.length} repositories named ${process.env.NEXT_PUBLIC_ARCHIVE_REPO_NAME} first`);
     const namedRepoPromises = namedRepos.map(async (repo) => {
       console.log(`Checking named repo: ${repo.full_name}`);
       const isFork = await isByrdocsArchiveFork(repo.full_name, githubToken);
@@ -122,7 +122,7 @@ async function findByrdocsArchiveFork(repositories?: Array<{ name: string; full_
   
   // If no named repos found, check other repositories
   if (otherRepos.length > 0) {
-    console.log(`No byrdocs-archive fork found in named repos, checking ${otherRepos.length} other repositories`);
+    console.log(`No ${process.env.NEXT_PUBLIC_ARCHIVE_REPO_NAME} fork found in named repos, checking ${otherRepos.length} other repositories`);
     const otherRepoPromises = otherRepos.map(async (repo) => {
       console.log(`Checking other repo: ${repo.full_name}`);
       const isFork = await isByrdocsArchiveFork(repo.full_name, githubToken);
@@ -229,8 +229,8 @@ export async function POST(request: NextRequest) {
 
         console.log(
           repositoryName
-            ? `Installation ${installation.id} created for ${installation.account.login} with byrdocs-archive fork: ${repositoryName}`
-            : `Installation ${installation.id} created for ${installation.account.login} (no byrdocs-archive fork found)`
+            ? `Installation ${installation.id} created for ${installation.account.login} with ${process.env.NEXT_PUBLIC_ARCHIVE_REPO_NAME} fork: ${repositoryName}`
+            : `Installation ${installation.id} created for ${installation.account.login} (no ${process.env.NEXT_PUBLIC_ARCHIVE_REPO_NAME} fork found)`
         );
         break;
       }
@@ -274,7 +274,7 @@ export async function POST(request: NextRequest) {
             currentInstallation?.isSuspended || false
           );
 
-          console.log(`byrdocs-archive fork ${repositoryName} added to installation ${installation.id}`);
+          console.log(`${process.env.NEXT_PUBLIC_ARCHIVE_REPO_NAME} fork ${repositoryName} added to installation ${installation.id}`);
         }
         break;
       }

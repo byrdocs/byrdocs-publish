@@ -248,7 +248,7 @@ export default function GitHubSetupPage() {
                 <div
                   onClick={() =>
                     window.open(
-                      "https://github.com/byrdocs/byrdocs-archive",
+                      process.env.NEXT_PUBLIC_ARCHIVE_REPO_URL,
                       "_blank"
                     )
                   }
@@ -261,7 +261,7 @@ export default function GitHubSetupPage() {
                       </div>
                       <div>
                         <p className="text-foreground">
-                          byrdocs/byrdocs-archive
+                          {`${process.env.NEXT_PUBLIC_ARCHIVE_REPO_OWNER}/${process.env.NEXT_PUBLIC_ARCHIVE_REPO_NAME}`}
                         </p>
                         <p className="text-sm text-muted-foreground">
                           BYR Docs 元信息存档
@@ -279,7 +279,7 @@ export default function GitHubSetupPage() {
                   <Button
                     onClick={() =>
                       window.open(
-                        "https://github.com/byrdocs/byrdocs-archive/fork",
+                        `${process.env.NEXT_PUBLIC_ARCHIVE_REPO_URL}/fork`,
                         "_blank"
                       )
                     }
@@ -485,7 +485,7 @@ export default function GitHubSetupPage() {
                         variant="outline"
                         onClick={() =>
                           window.open(
-                            "https://github.com/byrdocs/byrdocs-archive/fork",
+                            `${process.env.NEXT_PUBLIC_ARCHIVE_REPO_URL}/fork`,
                             "_blank"
                           )
                         }

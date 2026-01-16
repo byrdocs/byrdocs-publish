@@ -444,7 +444,7 @@ export default function FileUpload({
 
   const handleUseExistingFile = () => {
     if (fileExistsError && onSwitchToUrl) {
-      const url = `${NEXT_PUBLIC_SITE_BASE_URL}/files/${fileExistsError.md5}.${fileExistsError.extension}`;
+      const url = `${process.env.NEXT_PUBLIC_SITE_BASE_URL}/files/${fileExistsError.md5}.${fileExistsError.extension}`;
       
       setSelectedFile(null);
       onFileSelected?.(null);
@@ -642,7 +642,7 @@ export default function FileUpload({
                     {uploadedKey ? (
                       <span className="ml-1 text-green-600 font-mono break-all">
                         <a 
-                          href={`${NEXT_PUBLIC_SITE_BASE_URL}/files/${uploadedKey}`}
+                          href={`${process.env.NEXT_PUBLIC_SITE_BASE_URL}/files/${uploadedKey}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="hover:underline"
