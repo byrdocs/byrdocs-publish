@@ -241,6 +241,7 @@ export function EditFileClient({
   const handleTypeChange = (newType: FileType) => {
     if (!formData || !allTypeData || formData.type === newType) return;
 
+    console.log(allTypeData);
     // Save current form data to allTypeData
     const updatedAllTypeData = {
       ...allTypeData,
@@ -251,7 +252,6 @@ export function EditFileClient({
     // Switch to new type using stored data
     const newFormData = {
       type: newType,
-      schema: `https://files.byrdocs.org/schemas/${newType}.json`,
       data: updatedAllTypeData[newType],
       url: formData.url,
     };
