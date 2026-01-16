@@ -214,7 +214,7 @@ export async function checkRepositoryBinding(): Promise<{
 
     return {
       repoOwner: binding.installation.accountLogin,
-      repoName: binding.installation.repositoryName || 'byrdocs-archive',
+      repoName: binding.installation.repositoryName || process.env.NEXT_PUBLIC_ARCHIVE_REPO_NAME,
       userToken: binding.user.accessToken,
     };
   } catch (error) {
@@ -236,8 +236,8 @@ export async function syncUpstreamRepository(
 ): Promise<{ error?: string }> {
   try {
     const octokit = new Octokit({ auth: userToken });
-    const upstreamOwner = 'byrdocs';
-    const upstreamRepo = 'byrdocs-archive';
+    const upstreamOwner = process.env.NEXT_PUBLIC_ARCHIVE_REPO_OWNER;
+    const upstreamRepo = process.env.NEXT_PUBLIC_ARCHIVE_REPO_NAME;
 
     await syncWithUpstream(octokit, repoOwner, repoName, upstreamOwner, upstreamRepo);
     return {};
@@ -328,8 +328,8 @@ export async function createPullRequestAndCleanup(
       return { error: '没有文件变更需要提交' };
     }
 
-    const upstreamOwner = 'byrdocs';
-    const upstreamRepo = 'byrdocs-archive';
+    const upstreamOwner = process.env.NEXT_PUBLIC_ARCHIVE_REPO_OWNER;
+    const upstreamRepo = process.env.NEXT_PUBLIC_ARCHIVE_REPO_NAME;
 
     // Create PR
     const { title, body } = generateCommitMessage(fileChanges);
