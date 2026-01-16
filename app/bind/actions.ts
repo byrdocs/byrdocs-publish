@@ -52,8 +52,8 @@ export async function getCurrentBinding(): Promise<UserBinding | null> {
     id: binding.id,
     repository: {
       id: parseInt(binding.installation.installationId),
-      name: binding.installation.repositoryName || 'byrdocs-archive',
-      full_name: `${binding.installation.accountLogin}/${binding.installation.repositoryName || 'byrdocs-archive'}`,
+      name: binding.installation.repositoryName || process.env.NEXT_PUBLIC_ARCHIVE_REPO_NAME,
+      full_name: `${binding.installation.accountLogin}/${binding.installation.repositoryName || process.env.NEXT_PUBLIC_ARCHIVE_REPO_NAME}`,
       owner: {
         login: binding.installation.accountLogin,
         avatar_url: `https://github.com/${binding.installation.accountLogin}.png`,
