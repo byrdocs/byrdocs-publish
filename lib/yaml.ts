@@ -3,7 +3,7 @@ import * as YAML from "js-yaml";
 
 
 export const generateYaml = (fileType: FileType, formData: FormData) => {
-  const schemaUrl = `${process.env.NEXT_PUBLIC_SITE_BASE_URL}/schema/${fileType}.yaml`;
+  const schemaUrl = `${process.env.NEXT_PUBLIC_BYRDOCS_SITE_URL}/schema/${fileType}.yaml`;
 
   // 构建YAML对象
   const yamlObject: any = {

@@ -87,8 +87,8 @@ export const validateURLFileType = (
     return urlFormatValidation;
   }
 
-  if (cleanedUrl.origin !== process.env.NEXT_PUBLIC_SITE_BASE_URL) {
-      return { isValid: false, error: `URL 必须指向 ${process.env.NEXT_PUBLIC_SITE_BASE_URL}` };
+  if (cleanedUrl.origin !== process.env.NEXT_PUBLIC_BYRDOCS_SITE_URL) {
+      return { isValid: false, error: `URL 必须指向 ${process.env.NEXT_PUBLIC_BYRDOCS_SITE_URL}` };
   }
   const urlPattern =
     /^\/files\/([a-f0-9]{32})\.([a-zA-Z0-9]+)$/i;
@@ -168,22 +168,22 @@ export const validateURLFormat = (
     return { isValid: true }; // 空URL不验证
   }
 
-  if (!url.startsWith(`${process.env.NEXT_PUBLIC_SITE_BASE_URL}/files/`)) {
+  if (!url.startsWith(`${process.env.NEXT_PUBLIC_BYRDOCS_SITE_URL}/files/`)) {
     return {
       isValid: false,
-      error: `URL 必须以 ${process.env.NEXT_PUBLIC_SITE_BASE_URL}/files/ 开头`,
+      error: `URL 必须以 ${process.env.NEXT_PUBLIC_BYRDOCS_SITE_URL}/files/ 开头`,
     };
   }
 
   // 提取文件部分
-  const filePart = url.replace(`${process.env.NEXT_PUBLIC_SITE_BASE_URL}/files/`, "");
+  const filePart = url.replace(`${process.env.NEXT_PUBLIC_BYRDOCS_SITE_URL}/files/`, "");
 
   const dotIndex = filePart.lastIndexOf(".");
   if (dotIndex === -1) {
     return {
       isValid: false,
       error:
-        `URL中 缺少文件扩展名，格式应为：${process.env.NEXT_PUBLIC_SITE_BASE_URL}/files/[MD5].[扩展名]`,
+        `URL中 缺少文件扩展名，格式应为：${process.env.NEXT_PUBLIC_BYRDOCS_SITE_URL}/files/[MD5].[扩展名]`,
     };
   }
 

@@ -8,7 +8,7 @@ export function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-center space-x-3 py-4">
           <Link 
-            href={process.env.NEXT_PUBLIC_SITE_BASE_URL}
+            href={process.env.NEXT_PUBLIC_BYRDOCS_SITE_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center space-x-2 text-sm text-muted-foreground hover:text-foreground hover:underline group transition-colors"
