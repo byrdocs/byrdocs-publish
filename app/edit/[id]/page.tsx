@@ -4,7 +4,7 @@ import { EditFileClient } from './edit-file-client'
 
 async function getCourseList(): Promise<string[]> {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_DATA_BASE_URL}/metadata.json`);
+    const response = await fetch(`${process.env.NEXT_PUBLIC_R2_DATA_SITE_URL}/metadata.json`);
     const data = await response.json() as { courses?: string[] }
     return data.courses || []
   } catch (error) {

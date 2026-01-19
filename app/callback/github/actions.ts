@@ -13,7 +13,7 @@ interface GitHubUser {
 
 async function exchangeCodeForToken(code: string): Promise<{ access_token: string }> {
   const env = getRequestContext().env;
-  const origin = process.env.NODE_ENV === 'development' ? process.env.NEXT_PUBLIC_DEV_SITE_BASE_URL : process.env.NEXT_PUBLIC_PUBLISH_SITE_BASE_URL;
+  const origin = process.env.NODE_ENV === 'development' ? process.env.NEXT_PUBLIC_PUBLISH_DEV_SITE_URL : process.env.NEXT_PUBLIC_PUBLISH_SITE_URL;
   
   const response = await fetch('https://github.com/login/oauth/access_token', {
     method: 'POST',

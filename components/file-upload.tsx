@@ -164,7 +164,7 @@ export default function FileUpload({
     if (!token) {
       throw new Error('No authentication token found');
     }
-    const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_BASE_URL}/api/r2/mpu-start`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BYRDOCS_SITE_URL}/api/r2/mpu-start`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -195,7 +195,7 @@ export default function FileUpload({
     formData.append('uploadId', uploadId);
     formData.append('partNumber', partNumber.toString());
     formData.append('file', chunk);
-    const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_BASE_URL}/api/r2/mpu-uploadpart`,{
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BYRDOCS_SITE_URL}/api/r2/mpu-uploadpart`,{
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -246,7 +246,7 @@ export default function FileUpload({
     if (!token) {
       throw new Error('No authentication token found');
     }
-    const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_BASE_URL}/api/r2/mpu-complete`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BYRDOCS_SITE_URL}/api/r2/mpu-complete`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -269,7 +269,7 @@ export default function FileUpload({
     if (!token) {
       throw new Error('No authentication token found');
     }
-    const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_BASE_URL}/api/r2/mpu-abort`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BYRDOCS_SITE_URL}/api/r2/mpu-abort`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -444,7 +444,7 @@ export default function FileUpload({
 
   const handleUseExistingFile = () => {
     if (fileExistsError && onSwitchToUrl) {
-      const url = `${process.env.NEXT_PUBLIC_SITE_BASE_URL}/files/${fileExistsError.md5}.${fileExistsError.extension}`;
+      const url = `${process.env.NEXT_PUBLIC_BYRDOCS_SITE_URL}/files/${fileExistsError.md5}.${fileExistsError.extension}`;
       
       setSelectedFile(null);
       onFileSelected?.(null);
@@ -642,7 +642,7 @@ export default function FileUpload({
                     {uploadedKey ? (
                       <span className="ml-1 text-green-600 font-mono break-all">
                         <a 
-                          href={`${process.env.NEXT_PUBLIC_SITE_BASE_URL}/files/${uploadedKey}`}
+                          href={`${process.env.NEXT_PUBLIC_BYRDOCS_SITE_URL}/files/${uploadedKey}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="hover:underline"

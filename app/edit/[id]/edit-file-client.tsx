@@ -360,7 +360,7 @@ export function EditFileClient({
         finalFormData = {
           ...formData,
           id: newMd5,
-          url: `${process.env.NEXT_PUBLIC_SITE_BASE_URL}/files/${newFileKey}`,
+          url: `${process.env.NEXT_PUBLIC_BYRDOCS_SITE_URL}/files/${newFileKey}`,
         };
 
         // Handle file re-upload: delete old record and create new one
