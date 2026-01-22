@@ -6,6 +6,6 @@ pages_build_output_dir = ".vercel/output/static"
 vars = { NODE_VERSION = "23.9.0" }
 
 [[d1_databases]]
-binding="DB"
+binding = "DB"
 database_name = "byrdocs-publish"
-database_id = "5d137ad1-e28d-49d2-be28-fb9713142fd0"
+database_id = "ea32c9bc-c633-4a5d-83c0-4c3fe02510ad"
