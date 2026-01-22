@@ -3,9 +3,26 @@ compatibility_date = "2025-03-06"
 compatibility_flags = ["nodejs_compat"]
 pages_build_output_dir = ".vercel/output/static"
 
-vars = { NODE_VERSION = "23.9.0" }
-
 [[d1_databases]]
 binding = "DB"
 database_name = "byrdocs-publish"
 database_id = "ea32c9bc-c633-4a5d-83c0-4c3fe02510ad"
+
+[vars]
+NODE_VERSION = "23.9.0"
+# 主站网址，也是你为主站设定的自定义域名
+NEXT_PUBLIC_BYRDOCS_SITE_URL="https://byrdocs.cpphusky.xyz"
+# byrdocs-data 存储桶的自定义域名
+NEXT_PUBLIC_R2_DATA_SITE_URL="https://data.byrdocs.cpphusky.xyz"
+# BYR Docs Publish 的域名，见
+NEXT_PUBLIC_PUBLISH_SITE_URL="https://publish.byrdocs.cpphusky.xyz"
+# 测试用的网站域名
+NEXT_PUBLIC_PUBLISH_DEV_SITE_URL="http://localhost:3000"
+# 你的 GitHub APP 链接
+NEXT_PUBLIC_PUBLISH_APP_URL="https://github.com/apps/byr-docs-publish-test"
+# 你的基准仓库所有者
+NEXT_PUBLIC_ARCHIVE_REPO_OWNER="byrdocs"
+# 你的基准仓库名称
+NEXT_PUBLIC_ARCHIVE_REPO_NAME="byrdocs-archive-testing"
+# 你的基准仓库地址
+NEXT_PUBLIC_ARCHIVE_REPO_URL="https://github.com/byrdocs/byrdocs-archive-testing"
