@@ -34,7 +34,7 @@ export default function HomePage() {
               <p className="text-muted-foreground">
                 在提交之前，请您确保您已经阅读并理解
                 <Link
-                  href="https://github.com/byrdocs/byrdocs-archive/blob/master/CONTRIBUTING.md"
+                  href={`${process.env.NEXT_PUBLIC_ARCHIVE_REPO_URL}/blob/master/CONTRIBUTING.md`}
                   target="_blank"
                   className="text-blue-500 dark:text-blue-400 hover:underline mx-1 inline-block"
                 >
@@ -45,7 +45,7 @@ export default function HomePage() {
                 </Link>
                 <span className="text-muted-foreground">与</span>
                 <Link
-                  href="https://github.com/byrdocs/byrdocs-archive/blob/master/docs/%E6%96%87%E4%BB%B6%E8%A7%84%E5%88%99.md#%E6%96%87%E4%BB%B6%E6%94%B6%E5%BD%95%E8%A7%84%E5%88%99"
+                  href={`${process.env.NEXT_PUBLIC_ARCHIVE_REPO_URL}/blob/master/docs/%E6%96%87%E4%BB%B6%E8%A7%84%E5%88%99.md#%E6%96%87%E4%BB%B6%E6%94%B6%E5%BD%95%E8%A7%84%E5%88%99`}
                   target="_blank"
                   className="text-blue-500 dark:text-blue-400 hover:underline mx-1 inline-block"
                 >

@@ -1,3 +1,4 @@
+// Define them in .dev.vars
 interface CloudflareEnv {
   DB: D1Database;
   GITHUB_APP_PRIVATE_KEY: string;
@@ -6,4 +7,18 @@ interface CloudflareEnv {
   GITHUB_CLIENT_SECRET: string;
   JWT_SECRET: string;
   WEBHOOK_SECRET: string;
+}
+
+// Define them in .env
+declare namespace NodeJS {
+  interface ProcessEnv {
+    NEXT_PUBLIC_BYRDOCS_SITE_URL: string;
+    NEXT_PUBLIC_R2_DATA_SITE_URL: string;
+    NEXT_PUBLIC_PUBLISH_SITE_URL: string;
+    NEXT_PUBLIC_PUBLISH_DEV_SITE_URL: string;
+    NEXT_PUBLIC_PUBLISH_APP_URL: string;
+    NEXT_PUBLIC_ARCHIVE_REPO_OWNER: string;
+    NEXT_PUBLIC_ARCHIVE_REPO_NAME: string;
+    NEXT_PUBLIC_ARCHIVE_REPO_URL: string;
+  }
 }
