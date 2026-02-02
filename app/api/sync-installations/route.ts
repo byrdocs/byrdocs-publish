@@ -21,7 +21,7 @@ async function getAppInstallations(jwt:string) {
   return response.json();
 }
 
-async function getReposForInstallation(installationId:string, jwt:string):Promise<RepoInfo[]> {
+async function getRepoForInstallation(installationId:string, jwt:string):Promise<string> {
   const accessTokenResponse=await fetch(`https://api.github.com/app/installations/${installationId}/access_tokens`,{
     method:'POST',
     headers:{
@@ -38,12 +38,13 @@ async function getReposForInstallation(installationId:string, jwt:string):Promis
       'User-Agent':'BYR-Docs-Publish/1.0'
     },
   });
-  const reposData=await reposResponse.json();
-  return reposData.repositories.map((repo:any)=>({
+  const {repositories}=await reposResponse.json();
+  const reposInfo=repositories.map((repo:any)=>({
     name:repo.name,
     full_name:repo.full_name,
     private:repo.private,
   }satisfies RepoInfo));
+  return findByrdocsArchiveFork(reposInfo, token);
 }
 
 async function syncInstallations() {
@@ -54,19 +55,30 @@ async function syncInstallations() {
   try {
     const installations = await getAppInstallations(jwt);
     
+    const checkedInstallations:Array<{
+      installationId:string,
+      accountLogin:string,
+      accountType:string,
+      repoFullName:string|null,
+    }>=[];
     for (const installation of installations) {
-      const repositories = await getReposForInstallation(installation.id.toString(), jwt);
-      const forkNames=await findByrdocsArchiveFork(repositories, token);
+      const repositories = await getRepoForInstallation(installation.id.toString(), jwt);
       upsertInstallation(
         installation.id.toString(),
         installation.account.login,
         installation.account.type,
-        forkName || null,
+        repositories || null,
         installation.suspended_at!==null,
       );
+      checkedInstallations.push({
+        installationId: installation.id.toString(),
+        accountLogin: installation.account.login,
+        accountType: installation.account.type,
+        repoFullName: repositories,
+      });
     }
 
-    return { synced: installations.length };
+    return { synced: checkedInstallations };
   } catch (error) {
     console.error('Sync failed:', error);
     throw error;
@@ -77,7 +89,7 @@ export async function POST(request: NextRequest) {
   const env = getRequestContext().env;
   const authHeader = request.headers.get('authorization');
   
-  if (env.CRON_SECRET || authHeader !== `Bearer ${env.CRON_SECRET}`) {
+  if (!env.CRON_SECRET || authHeader !== `Bearer ${env.CRON_SECRET}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
