@@ -7,23 +7,23 @@ pages_build_output_dir = ".vercel/output/static"
 # Node.js 版本，使用 23.9.0
 NODE_VERSION = "23.9.0"
 # 主站网址，也是你为主站设定的自定义域名
-NEXT_PUBLIC_BYRDOCS_SITE_URL = "https://byrdocs.cpphusky.xyz"
+NEXT_PUBLIC_BYRDOCS_SITE_URL = "https://byrdocs.org"
 # byrdocs-data 存储桶的自定义域名
-NEXT_PUBLIC_R2_DATA_SITE_URL = "https://data.byrdocs.cpphusky.xyz"
+NEXT_PUBLIC_R2_DATA_SITE_URL = "https://data.byrdocs.org"
 # BYR Docs Publish 的域名，见下文第 11 步
-NEXT_PUBLIC_PUBLISH_SITE_URL = "https://publish.byrdocs.cpphusky.xyz"
+NEXT_PUBLIC_PUBLISH_SITE_URL = "https://publish.byrdocs.org"
 # 测试用的网站域名
 NEXT_PUBLIC_PUBLISH_DEV_SITE_URL = "http://localhost:3000"
 # 你的 GitHub APP 链接
-NEXT_PUBLIC_PUBLISH_APP_URL = "https://github.com/apps/byrdocs-publish-testing"
+NEXT_PUBLIC_PUBLISH_APP_URL = "https://github.com/apps/byrdocs-publish"
 # 你的基准仓库所有者
 NEXT_PUBLIC_ARCHIVE_REPO_OWNER = "byrdocs"
 # 你的基准仓库名称
-NEXT_PUBLIC_ARCHIVE_REPO_NAME = "byrdocs-archive-testing"
+NEXT_PUBLIC_ARCHIVE_REPO_NAME = "byrdocs-archive"
 # 你的基准仓库地址
-NEXT_PUBLIC_ARCHIVE_REPO_URL = "https://github.com/byrdocs/byrdocs-archive-testing"
+NEXT_PUBLIC_ARCHIVE_REPO_URL = "https://github.com/byrdocs/byrdocs-archive"
 
 [[d1_databases]]
 binding = "DB"
 database_name = "byrdocs-publish"
-database_id = "de1056e6-755b-43e0-8e0c-eaf75272b0e3"
+database_id = "c373b4d0-4e17-44bd-9b1e-a15f2473bf8c"
