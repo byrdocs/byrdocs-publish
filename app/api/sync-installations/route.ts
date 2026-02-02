@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
   const env = getRequestContext().env;
   const authHeader = request.headers.get('authorization');
   
-  if (!env.CRON_SECRET || authHeader !== `Bearer ${env.CRON_SECRET}`) {
+  if (!env.SYNC_INSTALLATION_SECRET || authHeader !== `Bearer ${env.SYNC_INSTALLATION_SECRET}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
