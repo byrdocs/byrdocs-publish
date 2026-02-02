@@ -1,8 +1,9 @@
 import { Octokit } from '@octokit/rest';
+import { getPrismaClient } from '@/lib/db';
 import { getRequestContext } from '@cloudflare/next-on-pages';
 
 type RepoInfo={ name: string; full_name: string; private: boolean };
-async function generateJWT(appId: string, privateKey: string): Promise<string> {
+export async function generateJWT(appId: string, privateKey: string): Promise<string> {
   const now = Math.floor(Date.now() / 1000);
   const payload = {
     iat: now - 60, // Issued 60 seconds ago to prevent clock skew
