@@ -103,3 +103,12 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+export async function GET(request:NextRequest){
+  return NextResponse.json({
+    message: `Usage:
+      POST /api/sync-installations
+      Authorization: Bearer \${SYNC_INSTALLATION_SECRET}
+    `
+  });
+}
