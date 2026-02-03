@@ -67,7 +67,7 @@
     "jose": "^6.0.11",
     "js-yaml": "^4.1.0",
     "lucide-react": "^0.454.0",
-    "next": "15.2.4",
+    "next": "15.2.9",
     "next-themes": "^0.4.4",
     "nextjs-toploader": "^3.9.17",
     "pinyin": "^4.0.0",
@@ -81,7 +81,7 @@
     "sonner": "^1.7.1",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
-    "vaul": "^0.9.9",
+    "vaul": "^1.1.2",
     "wrangler": "^4.59.3",
     "yaml": "^2.8.0",
     "zod": "^3.24.1"
