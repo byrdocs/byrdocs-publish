@@ -22,8 +22,8 @@ NEXT_PUBLIC_ARCHIVE_REPO_OWNER = "byrdocs"
 NEXT_PUBLIC_ARCHIVE_REPO_NAME = "byrdocs-archive"
 # 你的基准仓库地址
 NEXT_PUBLIC_ARCHIVE_REPO_URL = "https://github.com/byrdocs/byrdocs-archive"
-
 [[d1_databases]]
 binding = "DB"
 database_name = "byrdocs-publish"
-database_id = "2bc2f1a8-5879-47cb-9085-fc586f014599"
+database_id = "ec63632a-3cee-410d-b547-a02d465f2a96"
+
