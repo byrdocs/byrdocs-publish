@@ -4,46 +4,54 @@ import { RepoInfo, generateJWT, findByrdocsArchiveFork, upsertInstallation, getI
 import { getRequestContext } from '@cloudflare/next-on-pages';
 
 export const runtime = 'edge';
+const itemsPerPage=30;
 
 async function getAppInstallations(jwt:string) {
-  const response = await fetch('https://api.github.com/app/installations', {
-    headers: {
-      'Authorization': `Bearer ${jwt}`,
-      'Accept': 'application/vnd.github.v3+json',
-      'User-Agent': 'BYR-Docs-Publish/1.0'
-    }
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch installations: ${response.statusText}`);
-  }
-
-  return response.json();
+  return fetchAllPages(
+    `https://api.github.com/app/installations?per_page=${itemsPerPage}`,
+    {
+      headers: {
+        'Authorization': `Bearer ${jwt}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'User-Agent': 'BYR-Docs-Publish/1.0'
+      }
+    },
+    (data) => data
+  );
 }
 
 async function getRepoForInstallation(installationId:string, jwt:string):Promise<string> {
-  const accessTokenResponse=await fetch(`https://api.github.com/app/installations/${installationId}/access_tokens`,{
-    method:'POST',
-    headers:{
-      'Authorization':`Bearer ${jwt}`,
-      'Accept':'application/vnd.github.v3+json',
-      'User-Agent':'BYR-Docs-Publish/1.0'
+  const accessTokenResponse = await fetch(
+    `https://api.github.com/app/installations/${installationId}/access_tokens`,
+    {
+      method:'POST',
+      headers:{
+        'Authorization':`Bearer ${jwt}`,
+        'Accept':'application/vnd.github.v3+json',
+        'User-Agent':'BYR-Docs-Publish/1.0'
+      },
+    }
+  );
+  if (!accessTokenResponse.ok) {
+    throw new Error(`Failed to fetch installation access token: ${accessTokenResponse.statusText}`);
+  }
+  const {token} = await accessTokenResponse.json();
+  const repositories = await fetchAllPages(
+    `https://api.github.com/installation/repositories?per_page=${itemsPerPage}`,
+    {
+      headers:{
+        'Authorization':`Bearer ${token}`,
+        'Accept':'application/vnd.github.v3+json',
+        'User-Agent':'BYR-Docs-Publish/1.0'
+      },
     },
-  });
-  const {token}=await accessTokenResponse.json();
-  const reposResponse=await fetch('https://api.github.com/installation/repositories',{
-    headers:{
-      'Authorization':`Bearer ${token}`,
-      'Accept':'application/vnd.github.v3+json',
-      'User-Agent':'BYR-Docs-Publish/1.0'
-    },
-  });
-  const {repositories}=await reposResponse.json();
-  const reposInfo=repositories.map((repo:any)=>({
+    (data) => data.repositories ?? []
+  );
+  const reposInfo = repositories.map((repo:any)=>({
     name:repo.name,
     full_name:repo.full_name,
     private:repo.private,
-  }satisfies RepoInfo));
+  } satisfies RepoInfo));
   return findByrdocsArchiveFork(reposInfo, token);
 }
 
@@ -105,10 +113,46 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request:NextRequest){
-  return NextResponse.json({
-    message: `Usage:
-      POST /api/sync-installations
-      Authorization: Bearer \${SYNC_INSTALLATION_SECRET}
-    `
-  });
+  return NextResponse.text(`Usage:
+POST /api/sync-installations
+Authorization: Bearer \${SYNC_INSTALLATION_SECRET}
+`);
+}
+
+function parseNextLink(linkHeader:string | null):string | null {
+  if (!linkHeader) {
+    return null;
+  }
+  const parts = linkHeader.split(',');
+  for (const part of parts) {
+    const [urlPart, relPart] = part.split(';').map((value) => value.trim());
+    if (relPart === 'rel="next"' && urlPart?.startsWith('<') && urlPart.endsWith('>')) {
+      return urlPart.slice(1, -1);
+    }
+  }
+  return null;
+}
+
+async function fetchAllPages<T>(
+  url:string,
+  init:RequestInit,
+  getItems:(data:any) => T[]
+):Promise<T[]> {
+  const items:T[] = [];
+  let nextUrl:string | null = url;
+  let pageCount = 0;
+  while (nextUrl) {
+    pageCount += 1;
+    if (pageCount > itemsPerPage) {
+      throw new Error(`Pagination exceeded ${itemsPerPage} pages`);
+    }
+    const response = await fetch(nextUrl, init);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch paged data: ${response.statusText}`);
+    }
+    const data = await response.json();
+    items.push(...getItems(data));
+    nextUrl = parseNextLink(response.headers.get('link'));
+  }
+  return items;
 }
