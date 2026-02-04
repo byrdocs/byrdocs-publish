@@ -15,7 +15,7 @@ NEXT_PUBLIC_PUBLISH_SITE_URL = "https://publish.byrdocs.org"
 # 测试用的网站域名
 NEXT_PUBLIC_PUBLISH_DEV_SITE_URL = "http://localhost:3000"
 # 你的 GitHub APP 链接
-NEXT_PUBLIC_PUBLISH_APP_URL = "https://github.com/apps/byrdocs-publish"
+NEXT_PUBLIC_PUBLISH_APP_URL = "https://github.com/apps/byrdocs-publish-testing"
 # 你的基准仓库所有者
 NEXT_PUBLIC_ARCHIVE_REPO_OWNER = "byrdocs"
 # 你的基准仓库名称
