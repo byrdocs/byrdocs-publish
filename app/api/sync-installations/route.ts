@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request:NextRequest){
-  return NextResponse.text(`Usage:
+  return Response(`Usage:
 POST /api/sync-installations
 Authorization: Bearer \${SYNC_INSTALLATION_SECRET}
 `);
