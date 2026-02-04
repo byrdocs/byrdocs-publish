@@ -237,9 +237,9 @@ export async function syncUpstreamRepository(
   try {
     const octokit = new Octokit({ auth: userToken });
     const upstreamOwner = process.env.NEXT_PUBLIC_ARCHIVE_REPO_OWNER;
-    const upstreamRepo = process.env.NEXT_PUBLIC_ARCHIVE_REPO_NAME;
+    const upstreamName = process.env.NEXT_PUBLIC_ARCHIVE_REPO_NAME;
 
-    await syncWithUpstream(octokit, repoOwner, repoName, upstreamOwner, upstreamRepo);
+    await syncWithUpstream(octokit, repoOwner, repoName, upstreamOwner, upstreamName);
     return {};
   } catch (error) {
     console.error('Error syncing upstream:', error);
@@ -368,13 +368,13 @@ async function syncWithUpstream(
   repoOwner: string,
   repoName: string,
   upstreamOwner: string,
-  upstreamRepo: string
+  upstreamName: string
 ): Promise<void> {
   try {
     // Get the latest commit from upstream main branch
     const { data: upstreamCommit } = await octokit.rest.repos.getBranch({
       owner: upstreamOwner,
-      repo: upstreamRepo,
+      repo: upstreamName,
       branch: 'master',
     });
 
