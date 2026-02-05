@@ -376,10 +376,9 @@ export function FileChanges() {
           {/* 
             Detect upstream sync errors by checking for specific error messages.
             This matches errors from syncUpstreamRepository() in app/file-changes/actions.ts
-            which throws "Failed to sync with upstream repository" (English) or 
-            "同步上游仓库失败" (Chinese) when sync fails.
+            which throws "Failed to sync with upstream repository" when sync fails.
           */}
-          {commitError.includes('Failed to sync with upstream repository') || commitError.includes('同步上游仓库失败') ? (
+          {commitError.includes('Failed to sync with upstream repository') ? (
             <Alert className="bg-amber-50 dark:bg-amber-950 border-amber-300 dark:border-amber-700">
               <Info className="h-5 w-5 text-amber-600 dark:text-amber-400" />
               <AlertTitle className="text-amber-900 dark:text-amber-100 text-base font-semibold mb-3">
@@ -413,9 +412,9 @@ export function FileChanges() {
                   <div className="flex items-start space-x-3">
                     <span className="flex-shrink-0 w-6 h-6 bg-amber-600 dark:bg-amber-700 text-white rounded-full flex items-center justify-center text-sm font-semibold">2</span>
                     <div className="flex-1">
-                      <p className="font-medium text-amber-900 dark:text-amber-100 mb-1">点击"Sync fork"按钮</p>
+                      <p className="font-medium text-amber-900 dark:text-amber-100 mb-1">点击 "Sync fork" 按钮</p>
                       <p className="text-sm text-amber-700 dark:text-amber-300">
-                        在仓库页面上方找到绿色的 "Sync fork" 或 "同步 fork" 按钮并点击
+                        在仓库页面上方找到绿色的 "Sync fork" 按钮并点击
                       </p>
                     </div>
                   </div>
@@ -425,7 +424,7 @@ export function FileChanges() {
                     <div className="flex-1">
                       <p className="font-medium text-amber-900 dark:text-amber-100 mb-1">确认同步</p>
                       <p className="text-sm text-amber-700 dark:text-amber-300">
-                        在弹出的对话框中点击 "Update branch" 或 "更新分支" 按钮
+                        在弹出的对话框中点击 "Update branch" 按钮
                       </p>
                     </div>
                   </div>
