@@ -414,7 +414,7 @@ export function FileChanges() {
                     <div className="flex-1">
                       <p className="font-medium text-amber-900 dark:text-amber-100 mb-1">点击 "Sync fork" 按钮</p>
                       <p className="text-sm text-amber-700 dark:text-amber-300">
-                        在仓库页面上方找到绿色的 "Sync fork" 按钮并点击
+                        在仓库页面中可以看到绿色的 "<> Code" 按钮，它的下方有一 "Sync fork" 按钮
                       </p>
                     </div>
                   </div>
