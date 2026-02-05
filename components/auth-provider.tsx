@@ -70,8 +70,6 @@ export function AuthProvider({ children, initialUser = null, initialToken = null
   };
 
   const refreshBinding = useCallback(async () => {
-    if (!user) return;
-    
     try {
       setIsBindingLoading(true);
       const currentBinding = await getCurrentBinding();
@@ -82,7 +80,7 @@ export function AuthProvider({ children, initialUser = null, initialToken = null
     } finally {
       setIsBindingLoading(false);
     }
-  }, [user]);
+  }, []);
 
   const login = (currentPath?: string) => {
     const redirectTo = currentPath ? `?to=${encodeURIComponent(currentPath)}` : '';
