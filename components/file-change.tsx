@@ -373,6 +373,12 @@ export function FileChanges() {
       {/* Error display */}
       {commitError && (
         <>
+          {/* 
+            Detect upstream sync errors by checking for specific error messages.
+            This matches errors from syncUpstreamRepository() in app/file-changes/actions.ts
+            which throws "Failed to sync with upstream repository" (English) or 
+            "同步上游仓库失败" (Chinese) when sync fails.
+          */}
           {commitError.includes('Failed to sync with upstream repository') || commitError.includes('同步上游仓库失败') ? (
             <Alert className="bg-amber-50 dark:bg-amber-950 border-amber-300 dark:border-amber-700">
               <Info className="h-5 w-5 text-amber-600 dark:text-amber-400" />
@@ -394,10 +400,11 @@ export function FileChanges() {
                           href={`https://github.com/${binding.repository.full_name}`}
                           target="_blank"
                           rel="noopener noreferrer"
+                          aria-label={`在新窗口中打开 GitHub 仓库 ${binding.repository.full_name}`}
                           className="inline-flex items-center gap-2 px-3 py-2 bg-amber-100 dark:bg-amber-800 hover:bg-amber-200 dark:hover:bg-amber-700 text-amber-900 dark:text-amber-100 rounded-md text-sm font-medium transition-colors"
                         >
                           <span>前往 {binding.repository.full_name}</span>
-                          <ExternalLink className="h-4 w-4" />
+                          <ExternalLink className="h-4 w-4" aria-hidden="true" />
                         </a>
                       )}
                     </div>
