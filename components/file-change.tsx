@@ -13,8 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { GitCommit, Upload, RotateCcw, AlertCircle, Loader2, Link2, ExternalLink, Info } from "lucide-react"
+import { GitCommit, Upload, RotateCcw, AlertCircle, Loader2, Link2 } from "lucide-react"
 import { FileChangeItem } from "./file-change-item"
 import type { FileChange } from "@/lib/diff"
 import { 
@@ -372,105 +371,22 @@ export function FileChanges() {
 
       {/* Error display */}
       {commitError && (
-        <>
-          {/* 
-            Detect upstream sync errors by checking for specific error messages.
-            This matches errors from syncUpstreamRepository() in app/file-changes/actions.ts
-            which throws "Failed to sync with upstream repository" when sync fails.
-          */}
-          {commitError.includes('Failed to sync with upstream repository') ? (
-            <Alert className="bg-amber-50 dark:bg-amber-950 border-amber-300 dark:border-amber-700">
-              <Info className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-              <AlertTitle className="text-amber-900 dark:text-amber-100 text-base font-semibold mb-3">
-                需要手动同步您的 Fork 仓库
-              </AlertTitle>
-              <AlertDescription className="text-amber-800 dark:text-amber-200 space-y-3">
-                <p className="leading-relaxed">
-                  由于 GitHub 的已知问题，自动同步失败。请按照以下步骤手动同步您的 Fork 仓库：
-                </p>
-                
-                <div className="bg-white dark:bg-amber-900/30 rounded-lg p-4 space-y-3 border border-amber-200 dark:border-amber-800">
-                  <div className="flex items-start space-x-3">
-                    <span className="flex-shrink-0 w-6 h-6 bg-amber-600 dark:bg-amber-700 text-white rounded-full flex items-center justify-center text-sm font-semibold">1</span>
-                    <div className="flex-1">
-                      <p className="font-medium text-amber-900 dark:text-amber-100 mb-2">打开您绑定的仓库</p>
-                      {binding && (
-                        <a 
-                          href={`https://github.com/${binding.repository.full_name}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          aria-label={`在新窗口中打开 GitHub 仓库 ${binding.repository.full_name}`}
-                          className="inline-flex items-center gap-2 px-3 py-2 bg-amber-100 dark:bg-amber-800 hover:bg-amber-200 dark:hover:bg-amber-700 text-amber-900 dark:text-amber-100 rounded-md text-sm font-medium transition-colors"
-                        >
-                          <span>前往 {binding.repository.full_name}</span>
-                          <ExternalLink className="h-4 w-4" aria-hidden="true" />
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start space-x-3">
-                    <span className="flex-shrink-0 w-6 h-6 bg-amber-600 dark:bg-amber-700 text-white rounded-full flex items-center justify-center text-sm font-semibold">2</span>
-                    <div className="flex-1">
-                      <p className="font-medium text-amber-900 dark:text-amber-100 mb-1">点击 "Sync fork" 按钮</p>
-                      <p className="text-sm text-amber-700 dark:text-amber-300">
-                        在仓库页面中可以看到绿色的 "<> Code" 按钮，它的下方有一 "Sync fork" 按钮
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start space-x-3">
-                    <span className="flex-shrink-0 w-6 h-6 bg-amber-600 dark:bg-amber-700 text-white rounded-full flex items-center justify-center text-sm font-semibold">3</span>
-                    <div className="flex-1">
-                      <p className="font-medium text-amber-900 dark:text-amber-100 mb-1">确认同步</p>
-                      <p className="text-sm text-amber-700 dark:text-amber-300">
-                        在弹出的对话框中点击 "Update branch" 按钮
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start space-x-3">
-                    <span className="flex-shrink-0 w-6 h-6 bg-amber-600 dark:bg-amber-700 text-white rounded-full flex items-center justify-center text-sm font-semibold">4</span>
-                    <div className="flex-1">
-                      <p className="font-medium text-amber-900 dark:text-amber-100 mb-1">返回此页面重新提交</p>
-                      <p className="text-sm text-amber-700 dark:text-amber-300">
-                        同步完成后，返回此页面再次点击"提交更改"按钮
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-2 pt-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => setCommitError(null)}
-                    className="border-amber-300 dark:border-amber-700 text-amber-900 dark:text-amber-100 hover:bg-amber-100 dark:hover:bg-amber-900"
-                  >
-                    知道了
-                  </Button>
-                </div>
-              </AlertDescription>
-            </Alert>
-          ) : (
-            <Card className="bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800">
-              <CardContent className="py-4">
-                <div className="flex items-center space-x-3">
-                  <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
-                  <span className="text-red-800 dark:text-red-200 font-medium">{commitError}</span>
-                </div>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => setCommitError(null)}
-                  className="mt-3"
-                >
-                  知道了
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-        </>
+        <Card className="bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800">
+          <CardContent className="py-4">
+            <div className="flex items-center space-x-3">
+              <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
+              <span className="text-red-800 dark:text-red-200 font-medium">{commitError}</span>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCommitError(null)}
+              className="mt-3"
+            >
+              知道了
+            </Button>
+          </CardContent>
+        </Card>
       )}
 
 
