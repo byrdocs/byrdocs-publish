@@ -7,7 +7,7 @@ pages_build_output_dir = ".vercel/output/static"
 # Node.js 版本，使用 23.9.0
 NODE_VERSION = "23.9.0"
 # 主站网址，也是你为主站设定的自定义域名
-NEXT_PUBLIC_BYRDOCS_SITE_URL = "https://org.byrdocs.org"
+NEXT_PUBLIC_BYRDOCS_SITE_URL = "https://byrdocs.org"
 # byrdocs-data 存储桶的自定义域名
 NEXT_PUBLIC_R2_DATA_SITE_URL = "https://data.byrdocs.org"
 # BYR Docs Publish 的域名，见下文第 11 步
