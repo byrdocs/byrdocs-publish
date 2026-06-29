@@ -653,6 +653,11 @@ export function EditFileClient({
                   onUploadError={(error) => {
                     console.error("Upload error:", error);
                   }}
+                  onSwitchToUrl={(url: string) => {
+                    const urlObj = new URL(url);
+                    const key = urlObj.pathname.replace(/^\/files\//, '');
+                    handleFileUploadSuccess(key);
+                  }}
                   disableShortcuts={true}
                 />
               </CardContent>
